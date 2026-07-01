@@ -1,0 +1,212 @@
+/* ---------------- GLOBAL ---------------- */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.dashboard-container {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 20px 22px;
+}
+
+/* ---------------- HEADER ---------------- */
+
+.welcome-container {
+    margin-bottom: 14px;
+}
+
+.welcome-container h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #13294b;
+    line-height: 1.1;
+}
+
+.welcome-container p {
+    margin-top: 4px;
+    font-size: 1rem;
+}
+
+/* ---------- GRID ---------- */
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 16px;
+    align-items: stretch;
+}
+
+/* ---------- CHART CARD ---------- */
+
+.chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 18px;
+}
+
+.chart-wrapper h2 {
+    margin-bottom: 16px;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+/* ---------- PIE ---------- */
+
+.pie-container {
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    min-height: 0;
+}
+
+.pie-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 340px;
+    max-height: 340px;
+}
+
+/* ---------------- CAROUSEL ---------------- */
+
+.carousel-wrapper {
+    margin-top: 12px;
+}
+
+.carousel-card {
+    height: 170px;
+    border-radius: 14px;
+}
+
+.carousel-card h1 {
+    font-size: 1.9rem;
+}
+
+.carousel-card h2 {
+    font-size: 1rem;
+}
+
+/* ---------------- EXPENSES ---------------- */
+
+.expense-item {
+    padding: 14px 0;
+}
+
+.expense-item h3 {
+    font-size: 1.35rem;
+}
+
+.expense-item span {
+    font-size: 1rem;
+}
+
+/* ---------------- DESKTOP LARGE ---------------- */
+
+@media (min-width: 1500px) {
+
+    .dashboard-container {
+        max-width: 1180px;
+    }
+
+}
+
+/* ---------------- TABLET ---------------- */
+
+@media (max-width: 992px) {
+
+    .dashboard-container {
+        padding: 18px;
+    }
+
+    .content-grid {
+        gap: 16px;
+    }
+
+    .expenses-card,
+    .chart-card {
+        min-height: 300px;
+    }
+
+    .pie-container {
+        height: 260px;
+    }
+
+    .welcome-container h1 {
+        font-size: 2rem;
+    }
+
+}
+
+/* ---------------- MOBILE ---------------- */
+
+@media (max-width:768px) {
+
+    .dashboard-container {
+
+        padding: 16px;
+        padding-top: 26px;
+
+        overflow-x: hidden;
+    }
+
+    .welcome-container h1 {
+        font-size: 1.8rem;
+    }
+
+    .welcome-container p {
+        font-size: .95rem;
+    }
+
+    .content-grid {
+
+        grid-template-columns: 1fr;
+
+        gap: 16px;
+    }
+
+    .card {
+        padding: px;
+    }
+
+    .card h2 {
+        font-size: 1.5rem;
+    }
+
+    .expenses-card,
+    .chart-card {
+        min-height: auto;
+    }
+
+    .pie-container {
+        height: 240px;
+        margin-top: 8px;
+    }
+        
+    .pie-container canvas {
+        max-width: 190px;
+        max-height: 190px;
+    }
+
+    .carousel-card {
+        height: 150px;
+    }
+
+    .carousel-card h1 {
+        font-size: 1.6rem;
+    }
+
+    .carousel-card h2 {
+        font-size: .9rem;
+    }
+
+}

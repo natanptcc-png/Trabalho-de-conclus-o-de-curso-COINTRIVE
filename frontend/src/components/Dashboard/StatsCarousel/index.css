@@ -1,0 +1,189 @@
+.carousel-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.carousel-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 700ms cubic-bezier(.22, 1, .36, 1);
+    will-change: transform;
+}
+
+.carousel-track .stat-card {
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+.carousel-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    font-size: 2rem;
+    font-weight: bold;
+
+    color: #666;
+
+    transition: .2s;
+}
+
+.carousel-btn:hover {
+    transform: scale(1.1);
+    color: #111;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+
+    padding: 24px;
+
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card {
+    width: 100%;
+    min-height: 180px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 24px;
+}
+
+.stat-card img {
+    width: 90px;
+    height: 90px;
+
+    object-fit: contain;
+    flex-shrink: 0;
+
+    filter: brightness(200%) drop-shadow(0 0 4px black);
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 8px;
+
+    filter: drop-shadow(0 0 4px black);
+}
+
+.card-content h4 {
+    margin: 0;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.card-content span {
+    margin: 0;
+
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.income {
+    background-image: url("/bgs/income_bg.png");
+    background-size: cover;
+}
+
+.expense {
+    background-image: url("/bgs/expense_bg.png");
+    background-size: cover;
+    background-position: 100% 85%;
+}
+
+.wallet {
+    background-image: url("/bgs/wallet_bg.png");
+    background-size: cover;
+}
+
+.income h4,
+.income span {
+    color: var(--income-color);
+}
+
+.expense h4,
+.expense span {
+    color: var(--expense-color);
+}
+
+.wallet h4,
+.wallet span {
+    color: var(--wallet-color);
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: rgba(35, 35, 35, 0.3);
+
+    cursor: pointer;
+
+    transition: all .3s ease;
+}
+
+.dot:hover {
+    background: rgba(38, 38, 38, 0.5);
+}
+
+.dot.active {
+    width: 16px;
+    background: rgb(0, 0, 0);
+}
+
+@media (max-width: 768px) {
+
+    .carousel-wrapper {
+        gap: 10px;
+    }
+
+    .carousel-btn {
+        font-size: 1.5rem;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-card img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .card-content span {
+        font-size: 1.6rem;
+    }
+}
