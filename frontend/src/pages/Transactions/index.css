@@ -34,10 +34,10 @@
 }
 .modal {
     background: white;
-    padding: 18px;
+    padding: 22px;
     border-radius: 12px;
     width: 640px;
-    box-shadow: 0 18px 46px rgba(2,6,23,0.16);
+    box-shadow: 0 20px 60px rgba(2,6,23,0.2);
     transform: translateY(8px) scale(.99);
     opacity: 0;
     transition: transform 240ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease;
@@ -50,13 +50,10 @@
     transform: translateY(8px) scale(.99);
     opacity: 0;
 }
-.modal-form { display:flex; flex-direction:column; gap:10px; }
+.modal-form { display:flex; flex-direction:column; gap:12px; }
 .modal-form label { display:block; font-size:0.75rem; color:#64748b; }
-.modal-form input, .modal-form select { width:100%; padding:10px 10px; border-radius:8px; border:1px solid #e6e9ef; }
-.modal-form .row { display:flex; gap:12px; align-items:center; }
-
-.modal-form .row > label { flex: 1; display:flex; flex-direction:column; }
-.modal-form .row > .floating { flex:1; }
+.modal-form input, .modal-form select { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e9ef; }
+.modal-form .row { display:flex; gap:12px; }
 .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:4px; }
 
 /* modal content appear animation */
@@ -77,8 +74,7 @@
 
 /* Floating label for search */
 .floating { position: relative; width: 360px; }
-.modal .floating { width: 100%; }
-.floating input { padding: 12px 10px; border-radius: 8px; border: 1px solid #e6e9ef; width: 100%; }
+.floating input { padding: 14px 12px; border-radius: 10px; border: 1px solid #e6e9ef; width: 100%; }
 .floating label {
     position: absolute;
     left: 12px;
@@ -90,38 +86,11 @@
     background: transparent;
     padding: 0 6px;
 }
-
-/* animate when input is focused or has content (not placeholder-shown) */
-.floating input:focus + label,
-.floating input:not(:placeholder-shown) + label {
-    transform: translateY(-56%) scale(0.84);
-    color: #4f46e5;
-    background: white;
-}
-
-/* also support JS-driven filled/focused classes (modal inputs) */
 .floating.filled label,
 .floating.focused label {
     transform: translateY(-56%) scale(0.84);
     color: #4f46e5;
     background: white;
-}
-
-/* ensure modal floating label background matches modal background */
-.modal .floating input:focus + label,
-.modal .floating input:not(:placeholder-shown) + label { background: white; }
-
-/* disable floating animation for wrappers marked .no-float (date input) */
-.floating.no-float input:focus + label,
-.floating.no-float input:not(:placeholder-shown) + label,
-.floating.no-float.filled label,
-.floating.no-float.focused label {
-    transform: none !important;
-    color: #94a3b8 !important;
-    background: transparent !important;
-    top: 12px !important;
-    left: 12px !important;
-    font-size: 1rem !important;
 }
 
 /* Category select styles */
@@ -161,15 +130,16 @@
 .tab.active { background: rgba(65, 29, 242, 0.5); color: rgb(255, 255, 255) }
 
 .filters { display: flex; gap: 8px; align-items: center; }
-.filters input { padding: 10px 14px; border-radius: 10px; border: 1px solid #e6e9ef; width: 360px; }
-.filters select { padding: 10px 12px; border-radius: 10px; border: 1px solid #e6e9ef; }
-.date-filter { padding: 10px 12px; border-radius: 10px; border: 1px solid #e6e9ef; background: white; }
-
+    .filters input { padding: 14px 16px; border-radius: 10px; border: 1px solid #e6e9ef; width: 360px; }
+    .filters select { padding: 12px 14px; border-radius: 10px; border: 1px solid #e6e9ef; }
+    .date-filter { padding: 12px 14px; border-radius: 10px; border: 1px solid #e6e9ef; background: white; }
 .transactions-table-wrapper { background: white; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); padding: 14px; }
 .transactions-table { width: 100%; border-collapse: collapse; }
 .transactions-table thead th { text-align: left; padding: 12px; color: #64748b; font-size: 0.9rem; }
 .transactions-table tbody td { padding: 12px; border-top: 1px solid #f1f5f9; }
 .table-footer { padding: 12px; color: #94a3b8; font-size: 0.9rem; }
+
+.mobile-label { display: none; }
 
 .tag { display:inline-block; padding:6px 10px; border-radius: 999px; font-size:0.85rem; }
 .tag.income { background:#dcfce7; color:#166534; }
@@ -177,6 +147,8 @@
 
 @media (max-width: 768px) {
     .filters input { width: 160px; }
+
+    .filters .floating { width: 100%; }
 }
 
 /* Mobile-specific adjustments for Transactions */
@@ -210,9 +182,18 @@
         width: 100%;
     }
 
+    .filters .floating {
+        width: 100%;
+        min-width: 0;
+    }
+
     /* make table horizontally scrollable on small screens */
     .transactions-table-wrapper {
-        padding: 8px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0 12px;
+        box-sizing: border-box;
     }
 
     .transactions-table {
@@ -220,31 +201,54 @@
         width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        min-width: 0;
     }
 
     .transactions-table thead {
         display: none; /* hide header to save vertical space */
     }
 
+    .mobile-label {
+        display: block;
+        font-size: 0.65rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+    }
+
     .transactions-table tbody tr {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 6px;
-        padding: 12px;
-        border-radius: 8px;
-        background: #fff;
-        margin-bottom: 10px;
-        box-shadow: 0 6px 12px rgba(2,6,23,0.04);
+        gap: 10px;
+        padding: 14px;
+        border-radius: 16px;
+        background: #ffffff;
+        margin: 0 auto 14px;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        width: 88vw;
+        max-width: 560px;
+        box-sizing: border-box;
     }
 
     .transactions-table tbody td {
         display: flex;
         justify-content: space-between;
-        padding: 6px 8px;
+        align-items: center;
+        padding: 8px 10px;
         border-top: none;
     }
 
+    .transactions-table tbody td span.tag {
+        width: auto;
+    }
+
     .transactions-table tbody td:first-child { font-weight:600; color:#475569; }
+
+    .transactions-table tbody td:last-child {
+        color: #475569;
+    }
 
     .table-footer { padding: 10px 8px; }
 
@@ -266,7 +270,6 @@
         z-index: 2300;
         font-size: 1.6rem;
         cursor: pointer;
-        transform: translateX(80vw);
     }
 
     /* Ensure modal is centered and fits on small screens */
