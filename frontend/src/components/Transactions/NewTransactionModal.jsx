@@ -11,23 +11,36 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
         payment: "Débito",
         date: "",
     });
-
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [pendingPayload, setPendingPayload] = useState(null);
     const [visible, setVisible] = useState(open);
     const [closing, setClosing] = useState(false);
     const timeoutRef = useRef();
 
+    const resetForm = () => {
+        setForm({
+            description: "",
+            type: "Gastos",
+            category: "Comida",
+            amount: "",
+            payment: "Débito",
+            date: "",
+        });
+        setConfirmOpen(false);
+        setPendingPayload(null);
+    };
+
     useEffect(() => {
         if (open) {
-            // open immediately
             clearTimeout(timeoutRef.current);
             setVisible(true);
             setClosing(false);
         } else if (visible) {
-            // trigger close animation
             setClosing(true);
             timeoutRef.current = setTimeout(() => {
                 setVisible(false);
                 setClosing(false);
+                resetForm();
             }, 260);
         }
         return () => clearTimeout(timeoutRef.current);
@@ -35,27 +48,63 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
 
     const handleClose = () => {
         // run closing animation then notify parent
+        setConfirmOpen(false);
+        setPendingPayload(null);
         setClosing(true);
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
             setVisible(false);
             setClosing(false);
+            resetForm();
             onClose && onClose();
         }, 260);
     };
 
+    const parseDateValue = (value) => {
+        return value;
+    };
+
+    const formatAmountValue = (value) => {
+        if (!value) return "";
+        const normalized = value.toString().replace(',', '.');
+        const match = normalized.match(/^(-?\d+)(?:\.(\d*))?$/);
+        if (!match) return value;
+        const integerPart = match[1];
+        let decimalPart = match[2] ?? '';
+        if (decimalPart.length === 0) decimalPart = '00';
+        else if (decimalPart.length === 1) decimalPart = `${decimalPart}0`;
+        else decimalPart = decimalPart.slice(0, 2);
+        return `${integerPart}.${decimalPart}`;
+    };
+
     const submit = (e) => {
         e.preventDefault();
-        const payload = { ...form, id: Date.now() };
-        onAdd && onAdd(payload);
-        // close with animation
+        const payload = {
+            ...form,
+            id: Date.now(),
+            amount: formatAmountValue(form.amount),
+            date: parseDateValue(form.date),
+        };
+        setPendingPayload(payload);
+        setConfirmOpen(true);
+    };
+
+    const confirmSubmit = () => {
+        if (!pendingPayload) return;
+        onAdd && onAdd(pendingPayload);
+        setConfirmOpen(false);
         setClosing(true);
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => {
             setVisible(false);
             setClosing(false);
+            resetForm();
             onClose && onClose();
         }, 260);
+    };
+
+    const cancelConfirmation = () => {
+        setConfirmOpen(false);
     };
 
     if (!visible) return null;
@@ -93,7 +142,13 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
                     <div className="row">
                         <label>
                             VALOR (R$)
-                            <input type="number" step="0.01" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} required />
+                            <input
+                                type="text"
+                                value={form.amount}
+                                onChange={e => setForm({ ...form, amount: e.target.value })}
+                                onBlur={e => setForm({ ...form, amount: formatAmountValue(e.target.value) })}
+                                required
+                            />
                         </label>
 
                         <label>
@@ -109,7 +164,15 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
 
                     <label>
                         DATA
-                        <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} required />
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
+                            <input
+                                type="date"
+                                value={form.date}
+                                onChange={e => setForm({ ...form, date: e.target.value })}
+                                required
+                                style={{ flex: 1 }}
+                            />
+                        </div>
                     </label>
 
                     <div className="modal-actions">
@@ -118,6 +181,19 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
                     </div>
                 </form>
             </div>
+
+            {confirmOpen && (
+                <div className="modal-overlay open" style={{ zIndex: 2400 }}>
+                    <div className="modal open" style={{ width: 'min(560px, calc(100% - 32px))' }}>
+                        <h3>Confirmar criação</h3>
+                        <p>Tem certeza de que deseja criar esta transação?</p>
+                        <div className="modal-actions">
+                            <button type="button" className="btn" onClick={cancelConfirmation}>Voltar</button>
+                            <button type="button" className="btn primary" onClick={confirmSubmit}>Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

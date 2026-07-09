@@ -27,8 +27,6 @@
 .profile {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
 }
 
 .brand-logo {
@@ -162,6 +160,7 @@ hr {
 
         transform: translateX(-100%);
         box-shadow: 4px 0 16px rgba(0, 0, 0, .15);
+        z-index: 1200;
     }
 
     .nav-wrapper.open {

@@ -8,10 +8,14 @@ import { useState, useMemo } from "react";
 export default function Transactions() {
 
     const [query, setQuery] = useState("");
+    const [searchFocused, setSearchFocused] = useState(false);
     const [activeTab, setActiveTab] = useState("Todos");
     const [activeCategory, setActiveCategory] = useState("Todas as Categorias");
+    const [dateFilter, setDateFilter] = useState("Este Mês");
     const [modalOpen, setModalOpen] = useState(false);
     const [page, setPage] = useState(1);
+
+    const dateOptions = ["Este Mês", "Último Mês", "Último Ano", "Todo Período"];
 
     const [items, setItems] = useState(() => {
         // seed with some sample data
@@ -24,31 +28,11 @@ export default function Transactions() {
 
     const addItem = (tx) => {
         // normalize and store
-        const formatAmount = (input) => {
-            // if already a formatted string with sign, keep
-            if (typeof input === 'string') {
-                const s = input.trim();
-                if (s.startsWith('+') || s.startsWith('-') || s.includes('R$')) return s;
-                // try parse numeric string (accept comma)
-                const n = parseFloat(s.replace(/\s/g,'').replace(',', '.').replace(/[^0-9.\-]/g, ''));
-                if (!Number.isNaN(n)) {
-                    return (tx.type === 'Renda' ? '+ R$ ' : '- R$ ') + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                }
-                return s;
-            }
-            if (typeof input === 'number') {
-                const abs = Math.abs(input).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                const sign = input > 0 ? '+ R$ ' : (input < 0 ? '- R$ ' : (tx.type === 'Renda' ? '+ R$ ' : '- R$ '));
-                return `${sign}${abs}`;
-            }
-            return input;
-        };
-
         const normalized = {
             ...tx,
             type: tx.type,
             category: tx.category,
-            amount: formatAmount(tx.amount),
+            amount: tx.amount.startsWith("+") || tx.amount.startsWith("-") ? tx.amount : (tx.type === "Renda" ? `+ R$ ${tx.amount}` : `- R$ ${tx.amount}`),
             date: tx.date,
         };
         setItems(prev => [normalized, ...prev]);
@@ -57,14 +41,33 @@ export default function Transactions() {
 
     // filtering logic
     const filtered = useMemo(() => {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+        const oneYearAgo = new Date(now);
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+
         return items.filter(t => {
             if (activeTab === "Renda" && t.type !== "Renda") return false;
             if (activeTab === "Gastos" && t.type !== "Gastos") return false;
             if (activeCategory !== "Todas as Categorias" && t.category !== activeCategory) return false;
             if (query && !(t.description + " " + t.category).toLowerCase().includes(query.toLowerCase())) return false;
-            return true;
+
+            const txDate = new Date(t.date);
+            if (dateFilter === "Este Mês") {
+                return txDate >= startOfMonth && txDate <= endOfMonth;
+            }
+            if (dateFilter === "Último Mês") {
+                return txDate >= startOfLastMonth && txDate <= endOfLastMonth;
+            }
+            if (dateFilter === "Último Ano") {
+                return txDate >= oneYearAgo && txDate <= now;
+            }
+            return true; // Todo Período
         });
-    }, [items, activeTab, activeCategory, query]);
+    }, [items, activeTab, activeCategory, query, dateFilter]);
 
     // pagination
     const pageSize = 10;
@@ -91,10 +94,12 @@ export default function Transactions() {
                 </div>
 
                 <div className="filters">
-                    <div className={`floating ${query ? 'filled' : ''}`}>
+                    <div className={`floating ${query ? 'filled' : ''} ${searchFocused ? 'focused' : ''}`}>
                         <input
-                            placeholder=" "
+                            placeholder=""
                             value={query}
+                            onFocus={() => setSearchFocused(true)}
+                            onBlur={() => setSearchFocused(false)}
                             onChange={(e) => { setQuery(e.target.value); setPage(1); }}
                         />
                         <label>Procure por transação, categoria...</label>
@@ -102,7 +107,7 @@ export default function Transactions() {
 
                     <CategorySelect options={categories} value={activeCategory} onChange={(v) => { setActiveCategory(v); setPage(1); }} />
 
-                    <button className="date-filter">Este Mês</button>
+                    <CategorySelect options={dateOptions} value={dateFilter} onChange={(v) => { setDateFilter(v); setPage(1); }} />
                 </div>
             </div>
 
