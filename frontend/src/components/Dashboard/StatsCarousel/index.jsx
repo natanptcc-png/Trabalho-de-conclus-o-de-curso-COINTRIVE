@@ -1,23 +1,53 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import "./index.css";
 
-export default function StatsCarousel() {
+export default function StatsCarousel({ items = [] }) {
+    // Calculate current month stats
+    const stats = useMemo(() => {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        let totalIncome = 0;
+        let totalExpenses = 0;
+
+        items.forEach(item => {
+            const txDate = new Date(item.date);
+            if (txDate >= startOfMonth && txDate <= endOfMonth) {
+                const amount = parseFloat(item.amount.replace(/[^\d.-]/g, ""));
+                if (item.type === "Renda") {
+                    totalIncome += amount;
+                } else if (item.type === "Gastos") {
+                    totalExpenses += Math.abs(amount);
+                }
+            }
+        });
+
+        const netSavings = totalIncome - totalExpenses;
+
+        return {
+            income: totalIncome,
+            expenses: totalExpenses,
+            wallet: netSavings
+        };
+    }, [items]);
+
     const cards = [
         {
             title: "RENDA",
-            value: "R$ 8.500,00",
+            value: `R$ ${stats.income.toFixed(2).replace(".", ",")}`,
             icon: "/icons/renda.png",
             className: "income"
         },
         {
             title: "GASTOS",
-            value: "R$ 3.200,00",
+            value: `R$ ${stats.expenses.toFixed(2).replace(".", ",")}`,
             icon: "/icons/gastos.png",
             className: "expense"
         },
         {
             title: "CARTEIRA",
-            value: "R$ 4.300,00",
+            value: `R$ ${stats.wallet.toFixed(2).replace(".", ",")}`,
             icon: "/icons/carteira.png",
             className: "wallet"
         }

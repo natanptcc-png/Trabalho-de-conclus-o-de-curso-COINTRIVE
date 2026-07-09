@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import categories from "../../data/categories";
 
-export default function NewTransactionModal({ open, onClose, onAdd }) {
+export default function NewTransactionModal({ open, onClose, onAdd, editingItem, onUpdate }) {
 
     const [form, setForm] = useState({
         description: "",
@@ -15,6 +15,7 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
     const [pendingPayload, setPendingPayload] = useState(null);
     const [visible, setVisible] = useState(open);
     const [closing, setClosing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const timeoutRef = useRef();
 
     const resetForm = () => {
@@ -28,7 +29,23 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
         });
         setConfirmOpen(false);
         setPendingPayload(null);
+        setIsEditing(false);
     };
+
+    useEffect(() => {
+        if (editingItem) {
+            setIsEditing(true);
+            const amount = editingItem.amount.replace(/[^\d.-]/g, "");
+            setForm({
+                description: editingItem.description,
+                type: editingItem.type,
+                category: editingItem.category,
+                amount: amount,
+                payment: editingItem.payment,
+                date: editingItem.date,
+            });
+        }
+    }, [editingItem]);
 
     useEffect(() => {
         if (open) {
@@ -81,7 +98,6 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
         e.preventDefault();
         const payload = {
             ...form,
-            id: Date.now(),
             amount: formatAmountValue(form.amount),
             date: parseDateValue(form.date),
         };
@@ -91,7 +107,13 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
 
     const confirmSubmit = () => {
         if (!pendingPayload) return;
-        onAdd && onAdd(pendingPayload);
+        
+        if (isEditing && onUpdate) {
+            onUpdate(pendingPayload);
+        } else if (onAdd) {
+            onAdd(pendingPayload);
+        }
+        
         setConfirmOpen(false);
         setClosing(true);
         clearTimeout(timeoutRef.current);
@@ -111,11 +133,13 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
 
     const overlayClass = `modal-overlay ${!closing ? 'open' : 'closing'}`;
     const modalClass = `modal ${!closing ? 'open' : 'closing'}`;
+    const modalTitle = isEditing ? "Editar Transação" : "Nova Transação";
+    const submitButtonText = isEditing ? "Atualizar Transação" : "Adicionar Transação";
 
     return (
         <div className={overlayClass}>
             <div className={modalClass}>
-                <h3>Nova Transação</h3>
+                <h3>{modalTitle}</h3>
                 <form onSubmit={submit} className="modal-form">
                     <label>
                         DESCRIÇÃO
@@ -177,7 +201,7 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
 
                     <div className="modal-actions">
                         <button type="button" className="btn" onClick={handleClose}>Cancelar</button>
-                        <button type="submit" className="btn primary">Adicionar Transação</button>
+                        <button type="submit" className="btn primary">{submitButtonText}</button>
                     </div>
                 </form>
             </div>
@@ -185,8 +209,8 @@ export default function NewTransactionModal({ open, onClose, onAdd }) {
             {confirmOpen && (
                 <div className="modal-overlay open" style={{ zIndex: 2400 }}>
                     <div className="modal open" style={{ width: 'min(560px, calc(100% - 32px))' }}>
-                        <h3>Confirmar criação</h3>
-                        <p>Tem certeza de que deseja criar esta transação?</p>
+                        <h3>{isEditing ? "Confirmar atualização" : "Confirmar criação"}</h3>
+                        <p>{isEditing ? "Tem certeza que deseja atualizar esta transação?" : "Tem certeza de que deseja criar esta transação?"}</p>
                         <div className="modal-actions">
                             <button type="button" className="btn" onClick={cancelConfirmation}>Voltar</button>
                             <button type="button" className="btn primary" onClick={confirmSubmit}>Confirmar</button>

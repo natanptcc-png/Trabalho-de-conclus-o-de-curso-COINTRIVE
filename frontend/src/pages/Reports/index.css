@@ -1,0 +1,207 @@
+.reports-container {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 20px 22px;
+}
+
+.reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 20px;
+}
+
+.reports-header h1 {
+    font-size: 2.2rem;
+    margin: 0;
+}
+
+.period-selector {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.period-selector select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e6e9ef;
+    background: white;
+    cursor: pointer;
+}
+
+.overview-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.overview-cards .card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+}
+
+.overview-cards .card h3 {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.overview-cards .card .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: #1e293b;
+}
+
+.overview-cards .card .value.income {
+    color: #10b981;
+}
+
+.overview-cards .card .value.expense {
+    color: #ef4444;
+}
+
+.overview-cards .card .value.savings {
+    color: #3b82f6;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+}
+
+.chart-container h2 {
+    font-size: 1.1rem;
+    margin: 0 0 20px 0;
+    color: #1e293b;
+}
+
+.category-breakdown {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid #f1f5f9;
+}
+
+.category-breakdown h2 {
+    font-size: 1.1rem;
+    margin: 0 0 16px 0;
+    color: #1e293b;
+}
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.category-item span:first-child {
+    font-weight: 600;
+    color: #475569;
+}
+
+.category-item span:last-child {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .reports-container {
+        padding: 14px 12px 92px;
+    }
+
+    .reports-header {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 20px;
+    }
+
+    .reports-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .period-selector {
+        flex-direction: column;
+    }
+
+    .period-selector select,
+    .period-selector button {
+        width: 100%;
+    }
+
+    .overview-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .overview-cards .card {
+        padding: 16px;
+    }
+
+    .overview-cards .card h3 {
+        font-size: 0.75rem;
+    }
+
+    .overview-cards .card .value {
+        font-size: 1.4rem;
+    }
+
+    .charts-grid {
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .chart-container {
+        padding: 16px;
+    }
+
+    .chart-container h2 {
+        font-size: 1rem;
+    }
+
+    .category-breakdown {
+        padding: 16px;
+    }
+
+    .category-breakdown h2 {
+        font-size: 1rem;
+    }
+}

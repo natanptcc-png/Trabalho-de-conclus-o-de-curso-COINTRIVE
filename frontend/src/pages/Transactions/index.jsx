@@ -4,8 +4,10 @@ import NewTransactionModal from "../../components/Transactions/NewTransactionMod
 import categories from "../../data/categories";
 import CategorySelect from "../../components/Transactions/CategorySelect";
 import { useState, useMemo } from "react";
+import * as XLSX from "xlsx";
+import { showToast } from "../../utils/toast";
 
-export default function Transactions() {
+export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
 
     const [query, setQuery] = useState("");
     const [searchFocused, setSearchFocused] = useState(false);
@@ -13,30 +15,56 @@ export default function Transactions() {
     const [activeCategory, setActiveCategory] = useState("Todas as Categorias");
     const [dateFilter, setDateFilter] = useState("Este Mês");
     const [modalOpen, setModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [page, setPage] = useState(1);
 
     const dateOptions = ["Este Mês", "Último Mês", "Último Ano", "Todo Período"];
 
-    const [items, setItems] = useState(() => {
-        // seed with some sample data
-        return [
-            { id: 1, date: "2026-01-02", description: "Salary", category: "Renda", type: "Renda", amount: "+ R$ 8.500,00", payment: "Salário" },
-            { id: 2, date: "2026-01-03", description: "Supermarket", category: "Comida", type: "Gastos", amount: "- R$ 156,80", payment: "Débito" },
-            { id: 3, date: "2026-01-03", description: "Uber", category: "Transporte", type: "Gastos", amount: "- R$ 45,90", payment: "Débito" },
-        ];
-    });
-
-    const addItem = (tx) => {
-        // normalize and store
-        const normalized = {
-            ...tx,
-            type: tx.type,
-            category: tx.category,
-            amount: tx.amount.startsWith("+") || tx.amount.startsWith("-") ? tx.amount : (tx.type === "Renda" ? `+ R$ ${tx.amount}` : `- R$ ${tx.amount}`),
-            date: tx.date,
-        };
-        setItems(prev => [normalized, ...prev]);
+    const handleAddItem = (tx) => {
+        const normalized = onAdd(tx);
         setPage(1);
+        showToast({ type: "success", title: "Transação criada", message: `${normalized.description} foi adicionada com sucesso.` });
+        setModalOpen(false);
+    };
+
+    const handleEditItem = (tx) => {
+        onUpdate(editingId, tx);
+        showToast({ type: "success", title: "Transação atualizada", message: `${tx.description} foi atualizada com sucesso.` });
+        setModalOpen(false);
+        setEditingId(null);
+    };
+
+    const handleDeleteItem = (id) => {
+        if (confirm("Tem certeza que deseja deletar esta transação?")) {
+            onDelete(id);
+            showToast({ type: "info", message: "Transação deletada com sucesso." });
+        }
+    };
+
+    const handleExport = () => {
+        const rows = filtered.map(tx => ({
+            Data: tx.date,
+            Descrição: tx.description,
+            Categoria: tx.category,
+            Tipo: tx.type,
+            Valor: tx.amount,
+            Método: tx.payment,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Transações");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `transacoes-${new Date().toISOString().slice(0, 10)}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        showToast({ type: "success", title: "Exportação concluída", message: `${rows.length} transações foram exportadas.` });
     };
 
     // filtering logic
@@ -81,16 +109,26 @@ export default function Transactions() {
                 <h1>Transações</h1>
 
                 <div className="actions">
-                    <button className="btn export">Exportar</button>
-                    <button className="btn primary" onClick={() => setModalOpen(true)}>+ Nova Transação</button>
+                    <button className="btn export" onClick={handleExport}>Exportar</button>
+                    <button className="btn primary" onClick={() => { setEditingId(null); setModalOpen(true); }}>+ Nova Transação</button>
                 </div>
             </div>
 
             <div className="transactions-controls">
-                <div className="tabs">
-                    <button className={`tab ${activeTab==="Todos"?"active":""}`} onClick={()=>{setActiveTab("Todos"); setPage(1);}}>Todos</button>
-                    <button className={`tab ${activeTab==="Renda"?"active":""}`} onClick={()=>{setActiveTab("Renda"); setPage(1);}}>Renda</button>
-                    <button className={`tab ${activeTab==="Gastos"?"active":""}`} onClick={()=>{setActiveTab("Gastos"); setPage(1);}}>Gastos</button>
+                <div className="tabs-row">
+                    <div className="tabs">
+                        <button className={`tab ${activeTab==="Todos"?"active":""}`} onClick={()=>{setActiveTab("Todos"); setPage(1);}}>Todos</button>
+                        <button className={`tab ${activeTab==="Renda"?"active":""}`} onClick={()=>{setActiveTab("Renda"); setPage(1);}}>Renda</button>
+                        <button className={`tab ${activeTab==="Gastos"?"active":""}`} onClick={()=>{setActiveTab("Gastos"); setPage(1);}}>Gastos</button>
+                    </div>
+
+                    <button
+                        className="mobile-fab mobile-fab-inline"
+                        aria-label="Nova Transação"
+                        onClick={() => { setEditingId(null); setModalOpen(true); }}
+                    >
+                        +
+                    </button>
                 </div>
 
                 <div className="filters">
@@ -121,11 +159,17 @@ export default function Transactions() {
                             <th>TIPO</th>
                             <th>VALOR</th>
                             <th>MÉTODO DE PAGAMENTO</th>
+                            <th>AÇÕES</th>
                         </tr>
                     </thead>
                     <tbody>
                         {pageItems.map(tx => (
-                            <TransactionMemo key={tx.id} {...tx} />
+                            <TransactionMemo 
+                                key={tx.id} 
+                                {...tx} 
+                                onEdit={() => { setEditingId(tx.id); setModalOpen(true); }}
+                                onDelete={() => handleDeleteItem(tx.id)}
+                            />
                         ))}
                     </tbody>
                 </table>
@@ -143,16 +187,13 @@ export default function Transactions() {
                 )}
             </div>
 
-            <NewTransactionModal open={modalOpen} onClose={() => setModalOpen(false)} onAdd={addItem} />
-
-            {/* Mobile floating action button */}
-            <button
-                className="mobile-fab"
-                aria-label="Nova Transação"
-                onClick={() => setModalOpen(true)}
-            >
-                +
-            </button>
+            <NewTransactionModal 
+                open={modalOpen} 
+                onClose={() => { setModalOpen(false); setEditingId(null); }}
+                onAdd={handleAddItem}
+                editingItem={editingId ? items.find(i => i.id === editingId) : null}
+                onUpdate={handleEditItem}
+            />
 
         </div>
     );

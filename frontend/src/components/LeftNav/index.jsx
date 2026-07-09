@@ -55,11 +55,17 @@ export default function LeftNav({ menuOpen, setMenuOpen, setActivePage }) {
                        <ArrowLeftRight className='nav-icon' /> Transações
                     </button>
 
-                    <button className="nav-item">
+                    <button
+                        className="nav-item"
+                        onClick={() => setActivePage && setActivePage("reports")}
+                    >
                        <Summary className='nav-icon' /> Relatórios
                     </button>
 
-                    <button className="nav-item">
+                    <button 
+                        className="nav-item"
+                        onClick={() => setActivePage && setActivePage("settings")}
+                    >
                         <Settings className='nav-icon' /> Configurações
                     </button>
 

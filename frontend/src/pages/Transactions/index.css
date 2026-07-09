@@ -3,11 +3,19 @@
     max-width: 1080px;
     margin: 0 auto;
     padding: 20px 22px;
+    position: relative;
 }
 
 /* default: hide mobile FAB on larger screens */
 .mobile-fab {
     display: none;
+}
+
+.tabs-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 /* Modal styles */
@@ -130,9 +138,9 @@
 .tab.active { background: rgba(65, 29, 242, 0.5); color: rgb(255, 255, 255) }
 
 .filters { display: flex; gap: 8px; align-items: center; }
-    .filters input { padding: 14px 16px; border-radius: 10px; border: 1px solid #e6e9ef; width: 360px; }
-    .filters select { padding: 12px 14px; border-radius: 10px; border: 1px solid #e6e9ef; }
-    .date-filter { padding: 12px 14px; border-radius: 10px; border: 1px solid #e6e9ef; background: white; }
+.filters input { padding: 14px 16px; border-radius: 10px; border: 1px solid #e6e9ef; width: 360px; }
+.filters select { padding: 12px 14px; border-radius: 10px; border: 1px solid #e6e9ef; }
+.date-filter { padding: 12px 14px; border-radius: 10px; border: 1px solid #e6e9ef; background: white; }
 .transactions-table-wrapper { background: white; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); padding: 14px; }
 .transactions-table { width: 100%; border-collapse: collapse; }
 .transactions-table thead th { text-align: left; padding: 12px; color: #64748b; font-size: 0.9rem; }
@@ -155,7 +163,7 @@
 @media (max-width: 768px) {
 
     .transactions-container {
-        padding: 14px 12px;
+        padding: 14px 12px 92px;
     }
 
     .transactions-controls {
@@ -164,10 +172,18 @@
         gap: 12px;
     }
 
+    .tabs-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
     .tabs {
         display: flex;
         gap: 8px;
         overflow-x: auto;
+        flex: 1;
     }
 
     .filters {
@@ -254,11 +270,9 @@
 
     /* Floating action button for mobile */
     .mobile-fab {
-        position: fixed;
-        right: 18px;
-        bottom: 18px;
-        width: 56px;
-        height: 56px;
+        position: static;
+        width: 44px;
+        height: 44px;
         border-radius: 999px;
         background: #5b5df6;
         color: white;
@@ -268,8 +282,10 @@
         box-shadow: 0 8px 24px rgba(91,93,246,0.24);
         border: none;
         z-index: 2300;
-        font-size: 1.6rem;
+        font-size: 1.3rem;
         cursor: pointer;
+        pointer-events: auto;
+        flex-shrink: 0;
     }
 
     /* Ensure modal is centered and fits on small screens */
@@ -284,10 +300,52 @@
 
 }
 
+.transaction-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.action-btn {
+    background: none;
+    border: 1px solid #e6e9ef;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.action-btn.edit {
+    color: #5b5df6;
+}
+
+.action-btn.edit:hover {
+    background: rgba(91, 93, 246, 0.1);
+    border-color: #5b5df6;
+}
+
+.action-btn.delete {
+    color: #ef4444;
+}
+
+.action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
 /* hide header action buttons on small screens (we use FAB instead) */
 @media (max-width: 768px) {
     .transactions-header .actions .btn.export,
     .transactions-header .actions .btn.primary {
         display: none !important;
+    }
+
+    .transaction-actions {
+        gap: 4px;
+    }
+
+    .action-btn {
+        padding: 3px 6px;
+        font-size: 0.8rem;
     }
 }

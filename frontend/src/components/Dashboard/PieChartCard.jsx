@@ -6,6 +6,7 @@ import {
 } from "chart.js";
 
 import { Doughnut } from "react-chartjs-2";
+import { useMemo } from "react";
 
 ChartJS.register(
     ArcElement,
@@ -54,29 +55,55 @@ const centerTextPlugin = {
     }
 };
 
-export default function PieChartCard() {
+export default function PieChartCard({ items = [] }) {
+
+    // Calculate expense distribution
+    const chartData = useMemo(() => {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        const categoryExpenses = {};
+
+        items.forEach(item => {
+            if (item.type === "Gastos") {
+                const txDate = new Date(item.date);
+                if (txDate >= startOfMonth && txDate <= endOfMonth) {
+                    const amount = parseFloat(item.amount.replace(/[^\d.-]/g, ""));
+                    if (!categoryExpenses[item.category]) {
+                        categoryExpenses[item.category] = 0;
+                    }
+                    categoryExpenses[item.category] += Math.abs(amount);
+                }
+            }
+        });
+
+        const labels = Object.keys(categoryExpenses);
+        const data = Object.values(categoryExpenses);
+
+        return { labels, data };
+    }, [items]);
+
+    const colors = [
+        "#4dbf51",
+        "#2196F3",
+        "#FF9800",
+        "#E91E63",
+        "#9C27B0",
+        "#00BCD4",
+        "#8BC34A",
+        "#FFC107",
+    ];
 
     const data = {
-        labels: [
-            "Netflix",
-            "Internet",
-            "Eletricidade",
-            "Spotify"
-        ],
-
+        labels: chartData.labels.length === 0 ? ["Sem dados"] : chartData.labels,
         datasets: [
             {
-                data: [69.99, 180, 200, 59.99],
-
-                backgroundColor: [
-                    "#4dbf51",
-                    "#2196F3",
-                    "#FF9800",
-                    "#E91E63"
-                ],
-
+                data: chartData.data.length === 0 ? [1] : chartData.data,
+                backgroundColor: chartData.labels.length === 0 
+                    ? ["#e6e9ef"]
+                    : chartData.labels.map((_, i) => colors[i % colors.length]),
                 borderWidth: 0,
-
                 hoverOffset: 6
             }
         ]
