@@ -21,6 +21,10 @@ export default function LeftNav({ menuOpen, setMenuOpen, setActivePage }) {
 
                 <div className="nav-top">
 
+                    <div className="brand-logo">
+                        <img src="/business/Logo.png" alt="Contrive" />
+                    </div>
+
                     <div className="profile">
 
                         <div className="avatar">
@@ -41,7 +45,7 @@ export default function LeftNav({ menuOpen, setMenuOpen, setActivePage }) {
                         className="nav-item"
                         onClick={() => setActivePage && setActivePage("dashboard")}
                     >
-                        <LayoutDashboard className="nav-icon" /> Painel
+                        <LayoutDashboard className="nav-icon" /> Dashboard
                     </button>
 
                     <button

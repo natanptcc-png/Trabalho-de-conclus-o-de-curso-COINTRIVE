@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 
 import Dashboard from "./pages/Dashboard";
-import LeftNav from "./components/Dashboard/LeftNav";
+import Transactions from "./pages/Transactions";
+import PageTransition from "./components/common/PageTransition";
+import LeftNav from "./components/LeftNav";
 
 import "./App.css";
 
 function App() {
 
     const [menuOpen, setMenuOpen] = useState(false);
+    const [activePage, setActivePage] = useState("dashboard");
 
     useEffect(() => {
 
@@ -24,10 +27,11 @@ function App() {
 
         <div className="screens">
 
-            <LeftNav
-                menuOpen={menuOpen}
-                setMenuOpen={setMenuOpen}
-            />
+                <LeftNav
+                    menuOpen={menuOpen}
+                    setMenuOpen={setMenuOpen}
+                    setActivePage={setActivePage}
+                />
 
             <main className="dashboard-area">
 
@@ -40,11 +44,17 @@ function App() {
                         PS
                     </button>
 
-                    <span>Dashboard</span>
+                    <span>Painel</span>
 
                 </header>
 
-                <Dashboard />
+                <PageTransition show={activePage === "dashboard"}>
+                    <Dashboard />
+                </PageTransition>
+
+                <PageTransition show={activePage === "transactions"}>
+                    <Transactions />
+                </PageTransition>
 
             </main>
 

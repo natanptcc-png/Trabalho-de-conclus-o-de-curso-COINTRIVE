@@ -175,16 +175,21 @@
     }
 
     .card {
-        padding: px;
+        /* ensure cards stretch to same height inside the grid */
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 24px;
     }
 
     .card h2 {
         font-size: 1.5rem;
     }
 
+    /* make all cards a consistent minimum height on larger screens */
     .expenses-card,
     .chart-card {
-        min-height: auto;
+        min-height: 340px;
     }
 
     .pie-container {

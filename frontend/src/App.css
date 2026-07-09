@@ -115,3 +115,17 @@ body {
         z-index: 1100;
     }
 }
+
+/* Page transition animations */
+.page-transition {
+    width: 100%;
+    transition: transform 320ms cubic-bezier(.22,1,.36,1), opacity 220ms ease;
+}
+.page-transition.enter {
+    transform: translateY(0);
+    opacity: 1;
+}
+.page-transition.exit {
+    transform: translateY(6px);
+    opacity: 0;
+}

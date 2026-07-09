@@ -31,6 +31,19 @@
     margin-bottom: 10px;
 }
 
+.brand-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.brand-logo img {
+    max-width: 100px;
+    height: auto;
+    display: block;
+}
+
 .avatar {
     width: 42px;
     height: 42px;
@@ -155,6 +168,10 @@ hr {
         transform: translateX(0);
     }
 
+    .brand-logo {
+        display: none;
+    }
+
     .profile {
         gap: 8px;
         margin-bottom: 8px;
@@ -169,6 +186,12 @@ hr {
     .username {
         padding: 6px 10px;
         font-size: .9rem;
+        display: block;
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .nav-menu {
