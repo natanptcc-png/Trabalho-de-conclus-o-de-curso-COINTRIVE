@@ -124,10 +124,36 @@ export default function Reports({ items, userProfile }) {
                     "#f97316",
                     "#6366f1",
                 ],
-                borderColor: "white",
+                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-card') || 'white',
                 borderWidth: 2,
             },
         ],
+    };
+
+    const rootStyles = getComputedStyle(document.body);
+    const primaryText = (rootStyles.getPropertyValue('--text-primary') || '#1e293b').trim();
+    const bgCard = (rootStyles.getPropertyValue('--bg-card') || '#ffffff').trim();
+
+    const barOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { labels: { color: primaryText } },
+            tooltip: { titleColor: primaryText, bodyColor: primaryText, backgroundColor: bgCard }
+        },
+        scales: {
+            x: { ticks: { color: primaryText }, grid: { color: 'rgba(0,0,0,0.06)' } },
+            y: { ticks: { color: primaryText }, grid: { color: 'rgba(0,0,0,0.06)' } }
+        }
+    };
+
+    const pieOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { labels: { color: primaryText } },
+            tooltip: { titleColor: primaryText, bodyColor: primaryText, backgroundColor: bgCard }
+        }
     };
 
     const handleDownloadReport = () => {
@@ -194,12 +220,12 @@ export default function Reports({ items, userProfile }) {
             <div className="charts-grid">
                 <div className="chart-container">
                     <h2>Renda vs Gastos</h2>
-                    <Bar data={incomeVsExpensesChart} options={{ responsive: true, maintainAspectRatio: true }} />
+                    <Bar data={incomeVsExpensesChart} options={barOptions} />
                 </div>
 
                 <div className="chart-container">
                     <h2>Distribuição de Gastos</h2>
-                    <Pie data={expenseDistributionChart} options={{ responsive: true, maintainAspectRatio: true }} />
+                    <Pie data={expenseDistributionChart} options={pieOptions} />
                 </div>
             </div>
 

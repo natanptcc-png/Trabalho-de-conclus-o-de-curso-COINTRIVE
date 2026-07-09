@@ -35,7 +35,8 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
     useEffect(() => {
         if (editingItem) {
             setIsEditing(true);
-            const amount = editingItem.amount.replace(/[^\d.-]/g, "");
+            const rawAmount = editingItem.amount.replace(/[^\d.-]/g, "");
+            const amount = rawAmount.replace(/^[-+]/, "");
             setForm({
                 description: editingItem.description,
                 type: editingItem.type,

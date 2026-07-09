@@ -2,8 +2,9 @@ import "./index.css";
 import StatsCarousel from "../../components/Dashboard/StatsCarousel";
 import ExpensesList from "../../components/Dashboard/ExpensesList";
 import PieChartCard from "../../components/Dashboard/PieChartCard";
+import TopExpenses from "../../components/Dashboard/TopExpenses";
 
-export default function Dashboard({ items, userProfile }) {
+export default function Dashboard({ items, userProfile, onNavigate }) {
     return (
         <div className="dashboard-container">
 
@@ -19,18 +20,14 @@ export default function Dashboard({ items, userProfile }) {
             <div className="content-grid">
 
                 <div className="card expenses-card">
-                    <ExpensesList items={items} />
+                    <ExpensesList items={items} onNavigate={onNavigate} />
                 </div>
 
                 <div className="card chart-card">
-                    <PieChartCard items={items} />
+                    <TopExpenses items={items} />
                 </div>
 
-                <div className="card chart-card">
-                    <PieChartCard items={items} />
-                </div>
-
-                <div className="card chart-card">
+                <div className="card chart-card pie-full">
                     <PieChartCard items={items} />
                 </div>
 

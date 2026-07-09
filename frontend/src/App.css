@@ -29,6 +29,24 @@
     --sidebar-width: 220px;
 }
 
+/* Dark theme variables */
+.dark-theme {
+    --bg-primary: #0b1220;
+    --bg-card: #0f1724;
+
+    --text-primary: #e6eef8;
+    --text-secondary: #9aa7b6;
+
+    --income-color: #0ea5a3;
+    --expense-color: #f97316;
+    --wallet-color: #38bdf8;
+
+    --border-color: #1f2937;
+
+    --shadow-sm: 0 6px 20px rgba(2,6,23,0.6);
+    --shadow-md: 0 12px 36px rgba(2,6,23,0.7);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -43,6 +61,22 @@ body {
     color: var(--text-primary);
 
     min-height: 100vh;
+}
+
+/* Dark-mode icon + svg color enforcement */
+.dark-theme svg,
+.dark-theme .nav-icon,
+.dark-theme .notification-bell,
+.dark-theme .mobile-avatar,
+.dark-theme button,
+.dark-theme .nav-item {
+    color: var(--text-primary) !important;
+}
+
+/* Make default card backgrounds use the variable */
+.card,
+.dark-theme .card {
+    background: var(--bg-card);
 }
 
 .modal input,
@@ -81,6 +115,11 @@ body {
     display: none;
 }
 
+.desktop-notif{position:fixed;top:18px;right:24px;z-index:1200}
+
+.notification-bell{background:none;border:none;font-size:1.2rem;cursor:pointer;position:relative;padding:8px;display:inline-flex;align-items:center;gap:6px}
+.notification-bell .badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:white;border-radius:999px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700}
+
 .mobile-avatar {
     width: 42px;
     height: 42px;
@@ -95,16 +134,11 @@ body {
     cursor: pointer;
 }
 
-@media (max-width: 768px) {
-
-    .dashboard-area {
-        margin-left: 0;
-        width: 100%;
-        display: block;
+    .dark-theme .avatar,
+    .dark-theme .mobile-avatar {
+        background: #25314f;
     }
 
-    .mobile-header {
-        display: flex;
 
         align-items: center;
         gap: 12px;

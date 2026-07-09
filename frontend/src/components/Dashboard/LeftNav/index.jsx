@@ -2,7 +2,7 @@ import "./index.css";
 
 import { LayoutDashboard, ArrowLeftRight, Summary, Settings, SkipBack } from "lucide-react"
 
-export default function LeftNav({ menuOpen, setMenuOpen, setActivePage }) {
+export default function LeftNav({ menuOpen, setMenuOpen, onNavigate }) {
 
     return (
         <>
@@ -39,14 +39,14 @@ export default function LeftNav({ menuOpen, setMenuOpen, setActivePage }) {
 
                     <button
                         className="nav-item"
-                        onClick={() => setActivePage && setActivePage("dashboard")}
+                        onClick={() => onNavigate && onNavigate("dashboard")}
                     >
                         <LayoutDashboard className="nav-icon" /> Painel
                     </button>
 
                     <button
                         className="nav-item"
-                        onClick={() => setActivePage && setActivePage("transactions")}
+                        onClick={() => onNavigate && onNavigate("transactions")}
                     >
                        <ArrowLeftRight className='nav-icon' /> Transações
                     </button>

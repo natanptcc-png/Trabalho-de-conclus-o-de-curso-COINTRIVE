@@ -12,8 +12,8 @@
 
     padding: 20px 15px;
 
-    background: #fff;
-    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.35));
+    background: var(--bg-card);
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.25));
 
     overflow-y: auto;
     transition: transform .3s ease;
@@ -42,6 +42,10 @@
     display: block;
 }
 
+.dark-theme .brand-logo img {
+    filter: brightness(0) invert(1);
+}
+
 .avatar {
     width: 42px;
     height: 42px;
@@ -61,13 +65,16 @@
 .username {
     padding: 8px 12px;
 
-    background: #fff;
+    background: transparent;
     border-radius: 6px;
 
-    color: #0019ff;
+    color: var(--text-primary);
     font-weight: 600;
 
     white-space: nowrap;
+    max-width: calc(220px - 72px);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-menu {
@@ -89,8 +96,8 @@
     border: none;
     border-radius: 0 20px 20px 0;
 
-    background: #fff;
-    color: #686868;
+    background: transparent;
+    color: var(--text-secondary);
 
     text-align: left;
     font-family: system-ui, sans-serif;
@@ -101,9 +108,15 @@
 }
 
 .nav-item:hover {
-    background: rgba(65, 29, 242, 0.12);
-    color: #0019ff;
+    background: rgba(79,70,229,0.12); /* bluish transparent */
+    color: var(--text-primary);
     transform: translateX(3px);
+}
+
+/* Dark theme: slightly stronger blue hover */
+.dark-theme .nav-item:hover {
+    background: rgba(79,70,229,0.18);
+    color: var(--text-primary);
 }
 
 .nav-icon {

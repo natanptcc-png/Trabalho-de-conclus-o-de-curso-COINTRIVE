@@ -13,6 +13,8 @@ export default function Settings({
     markAllNotificationsAsRead,
     items,
     onUpdate,
+    theme,
+    setTheme,
 }) {
     const [editMode, setEditMode] = useState(false);
     const [tempProfile, setTempProfile] = useState(userProfile);
@@ -57,6 +59,10 @@ export default function Settings({
             ...prev,
             [type]: !prev[type],
         }));
+    };
+
+    const handleToggleTheme = () => {
+        setTheme((t) => (t === "dark" ? "light" : "dark"));
     };
 
     const handleToggleContasPaid = (itemId) => {
@@ -233,6 +239,23 @@ export default function Settings({
                                     checked={notificationSettings.contasAlerts}
                                     onChange={() => handleToggleNotification("contasAlerts")}
                                 />
+                                <span></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Appearance Section */}
+                <section className="settings-section">
+                    <h2>Aparência</h2>
+                    <div className="notification-settings">
+                        <div className="setting-item">
+                            <div className="setting-label">
+                                <h3>Modo Escuro</h3>
+                                <p>Ative para usar o tema escuro em toda a aplicação</p>
+                            </div>
+                            <label className="toggle">
+                                <input type="checkbox" checked={theme === "dark"} onChange={handleToggleTheme} />
                                 <span></span>
                             </label>
                         </div>

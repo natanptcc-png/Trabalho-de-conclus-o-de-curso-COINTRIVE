@@ -100,34 +100,34 @@
     font-weight: 700;
 }
 
-.income {
+.stat-card.income {
     background-image: url("/bgs/income_bg.png");
     background-size: cover;
 }
 
-.expense {
+.stat-card.expense {
     background-image: url("/bgs/expense_bg.png");
     background-size: cover;
     background-position: 100% 85%;
 }
 
-.wallet {
+.stat-card.wallet {
     background-image: url("/bgs/wallet_bg.png");
     background-size: cover;
 }
 
-.income h4,
-.income span {
+.stat-card.income h4,
+.stat-card.income span {
     color: var(--income-color);
 }
 
-.expense h4,
-.expense span {
+.stat-card.expense h4,
+.stat-card.expense span {
     color: var(--expense-color);
 }
 
-.wallet h4,
-.wallet span {
+.stat-card.wallet h4,
+.stat-card.wallet span {
     color: var(--wallet-color);
 }
 
@@ -161,6 +161,39 @@
 .dot.active {
     width: 16px;
     background: rgb(0, 0, 0);
+}
+
+/* Dark theme dot colors */
+.dark-theme .dot {
+    background: rgba(255,255,255,0.18);
+}
+.dark-theme .dot:hover {
+    background: rgba(255,255,255,0.28);
+}
+.dark-theme .dot.active {
+    background: #ffffff;
+}
+
+.dark-theme .stat-card {
+    background: transparent;
+}
+
+.dark-theme .stat-card.income {
+    background-image: url("/bgs/income_bg.png");
+    background-size: cover;
+    background-position: center;
+}
+
+.dark-theme .stat-card.expense {
+    background-image: url("/bgs/expense_bg.png");
+    background-size: cover;
+    background-position: 100% 85%;
+}
+
+.dark-theme .stat-card.wallet {
+    background-image: url("/bgs/wallet_bg.png");
+    background-size: cover;
+    background-position: center;
 }
 
 @media (max-width: 768px) {

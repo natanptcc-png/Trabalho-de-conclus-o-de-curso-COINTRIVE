@@ -1,44 +1,42 @@
 import { useState, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
+import { Bell } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-import Dashboard from "./pages/Dashboard";
-import Transactions from "./pages/Transactions";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import PageTransition from "./components/common/PageTransition";
+import Router from "./Router";
+import Skeleton from "./components/common/Skeleton";
 import LeftNav from "./components/LeftNav";
+
+const mockData = {
+    items: [
+        { id: 1, date: "2026-01-02", description: "Salary", category: "Renda", type: "Renda", amount: "+ R$ 8.500,00", payment: "Salário", isPaid: null },
+        { id: 2, date: "2026-01-03", description: "Supermarket", category: "Comida", type: "Gastos", amount: "- R$ 156,80", payment: "Débito", isPaid: null },
+        { id: 3, date: "2026-01-03", description: "Uber", category: "Transporte", type: "Gastos", amount: "- R$ 45,90", payment: "Débito", isPaid: null },
+    ],
+    userProfile: {
+        firstName: "Daniel",
+        lastName: "Silva",
+        email: "daniel@email.com",
+        phone: "+55 11 99999-9999",
+        bio: "Personal finance enthusiast",
+        currency: "BRL",
+    }
+};
 
 import "./App.css";
 
 function App() {
 
     const [menuOpen, setMenuOpen] = useState(false);
-    const [activePage, setActivePage] = useState("dashboard");
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     // Global transaction data
-    const [items, setItems] = useState(() => {
-        const stored = localStorage.getItem("transactions");
-        if (stored) return JSON.parse(stored);
-        return [
-            { id: 1, date: "2026-01-02", description: "Salary", category: "Renda", type: "Renda", amount: "+ R$ 8.500,00", payment: "Salário", isPaid: null },
-            { id: 2, date: "2026-01-03", description: "Supermarket", category: "Comida", type: "Gastos", amount: "- R$ 156,80", payment: "Débito", isPaid: null },
-            { id: 3, date: "2026-01-03", description: "Uber", category: "Transporte", type: "Gastos", amount: "- R$ 45,90", payment: "Débito", isPaid: null },
-        ];
-    });
+    const [items, setItems] = useState(mockData.items);
 
     // Global user profile
-    const [userProfile, setUserProfile] = useState(() => {
-        const stored = localStorage.getItem("userProfile");
-        if (stored) return JSON.parse(stored);
-        return {
-            firstName: "Daniel",
-            lastName: "Silva",
-            email: "daniel@email.com",
-            phone: "+55 11 99999-9999",
-            bio: "Personal finance enthusiast",
-            currency: "BRL",
-        };
-    });
+    const [userProfile, setUserProfile] = useState(mockData.userProfile);
 
     // Global notifications
     const [notifications, setNotifications] = useState(() => {
@@ -58,21 +56,11 @@ function App() {
     });
 
     const pageHeaders = {
-        dashboard: "Painel",
+        dashboard: "Dashboard",
         transactions: "Transações",
         reports: "Relatórios",
         settings: "Configurações",
     };
-
-    // Persist transactions to localStorage
-    useEffect(() => {
-        localStorage.setItem("transactions", JSON.stringify(items));
-    }, [items]);
-
-    // Persist user profile to localStorage
-    useEffect(() => {
-        localStorage.setItem("userProfile", JSON.stringify(userProfile));
-    }, [userProfile]);
 
     // Persist notifications to localStorage
     useEffect(() => {
@@ -84,6 +72,58 @@ function App() {
         localStorage.setItem("notificationSettings", JSON.stringify(notificationSettings));
     }, [notificationSettings]);
 
+    // initial skeleton on first load
+    useEffect(() => {
+        const t = setTimeout(() => setLoading(false), 700);
+        return () => clearTimeout(t);
+    }, []);
+
+    // navigation wrapper to show skeleton between pages
+    const switchPage = (page) => {
+        setLoading(true);
+        setTimeout(() => {
+            const route = page.startsWith("/") ? page : `/${page}`;
+            navigate(route);
+            setTimeout(() => setLoading(false), 250);
+        }, 220);
+    };
+
+    const currentPageKey = location.pathname === "/" ? "dashboard" : location.pathname.replace(/^[\/]/, "");
+    const pageHeader = pageHeaders[currentPageKey] || "Dashboard";
+
+    // Theme (light | dark)
+    const [theme, setTheme] = useState(() => {
+        const stored = localStorage.getItem("theme");
+        return stored || "light";
+    });
+
+    useEffect(() => {
+        localStorage.setItem("theme", theme);
+        if (theme === "dark") {
+            document.body.classList.add("dark-theme");
+        } else {
+            document.body.classList.remove("dark-theme");
+        }
+    }, [theme]);
+
+    const formatTransactionAmount = (tx) => {
+        const rawAmount = String(tx.amount ?? "").trim();
+        const cleanedAmount = rawAmount.replace(/[^\d.-]/g, "");
+        const normalizedAmount = cleanedAmount.startsWith("+") || cleanedAmount.startsWith("-")
+            ? cleanedAmount
+            : cleanedAmount;
+
+        if (!normalizedAmount) {
+            return rawAmount;
+        }
+
+        return normalizedAmount.startsWith("+") || normalizedAmount.startsWith("-")
+            ? `${normalizedAmount.startsWith("+") ? "+ R$" : "- R$"} ${normalizedAmount.replace(/^[-+]/, "").trim()}`
+            : tx.type === "Renda"
+                ? `+ R$ ${normalizedAmount}`
+                : `- R$ ${normalizedAmount}`;
+    };
+
     // Transaction management functions
     const addItem = (tx) => {
         const normalized = {
@@ -91,7 +131,7 @@ function App() {
             id: items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1,
             type: tx.type,
             category: tx.category,
-            amount: tx.amount.startsWith("+") || tx.amount.startsWith("-") ? tx.amount : (tx.type === "Renda" ? `+ R$ ${tx.amount}` : `- R$ ${tx.amount}`),
+            amount: formatTransactionAmount(tx),
             date: tx.date,
             isPaid: tx.category === "Contas" ? false : null,
         };
@@ -102,7 +142,7 @@ function App() {
     const updateItem = (id, updates) => {
         setItems(prev =>
             prev.map(item =>
-                item.id === id ? { ...item, ...updates } : item
+                item.id === id ? { ...item, ...updates, amount: formatTransactionAmount({...item, ...updates}) } : item
             )
         );
     };
@@ -196,6 +236,22 @@ function App() {
         }
     }, [items, notificationSettings]);
 
+    const getAvatarColor = (firstName) => {
+        if (!firstName) return "hsl(220,30%,80%)";
+        const ch = firstName.trim().charCodeAt(0);
+        const index = (ch - 65 + 26) % 26; // map to 0-25
+        const hue = Math.round((index / 26) * 360);
+        return `hsl(${hue} 30% 80%)`;
+    };
+
+    const getFirstLastName = (lastName) => {
+        if (!lastName) return "";
+        const skip = ["do", "dos", "de"];
+        const parts = lastName.split(/\s+/).filter(Boolean);
+        const chosen = parts.find(p => !skip.includes(p.toLowerCase()));
+        return (chosen || parts[0] || "").trim();
+    };
+
     useEffect(() => {
         document.body.style.overflow =
             menuOpen ? "hidden" : "auto";
@@ -210,31 +266,54 @@ function App() {
 
         <div className="screens">
 
-                <LeftNav
-                    menuOpen={menuOpen}
-                    setMenuOpen={setMenuOpen}
-                    setActivePage={setActivePage}
-                />
+                    <LeftNav
+                        menuOpen={menuOpen}
+                        setMenuOpen={setMenuOpen}
+                        onNavigate={switchPage}
+                        userProfile={userProfile}
+                    />
 
             <main className="dashboard-area">
 
+                <div className="desktop-notif">
+                    <button
+                        className="notification-bell desktop"
+                        onClick={() => switchPage("settings")}
+                        title="Notificações"
+                    >
+                        <Bell />
+                        {notifications.filter(n => !n.read).length > 0 && (
+                            <span className="badge">{notifications.filter(n => !n.read).length}</span>
+                        )}
+                    </button>
+                </div>
+
                 <header className="mobile-header">
 
-                    <button
-                        className="mobile-avatar"
-                        onClick={() => setMenuOpen(true)}
-                    >
-                        {userProfile.firstName.charAt(0)}{userProfile.lastName.charAt(0)}
-                    </button>
+                    {(() => {
+                        const first = (userProfile.firstName || "").trim();
+                        const lastFirst = getFirstLastName(userProfile.lastName || "");
+                        const initials = `${(first.charAt(0)||"").toUpperCase()}${(lastFirst.charAt(0)||"").toUpperCase()}`;
+                        const bg = getAvatarColor(first);
+                        return (
+                            <button
+                                className="mobile-avatar"
+                                onClick={() => setMenuOpen(true)}
+                                style={{ background: bg, color: "var(--text-primary)", fontWeight: 700 }}
+                            >
+                                {initials}
+                            </button>
+                        );
+                    })()}
 
-                    <span>{pageHeaders[activePage]}</span>
+                    <span>{pageHeader}</span>
 
                     <button 
                         className="notification-bell"
-                        onClick={() => setActivePage("settings")}
+                        onClick={() => switchPage("settings")}
                         title="Notificações"
                     >
-                        🔔
+                        <Bell />
                         {notifications.filter(n => !n.read).length > 0 && (
                             <span className="badge">{notifications.filter(n => !n.read).length}</span>
                         )}
@@ -242,37 +321,25 @@ function App() {
 
                 </header>
 
-                <PageTransition show={activePage === "dashboard"}>
-                    <Dashboard items={items} userProfile={userProfile} />
-                </PageTransition>
-
-                <PageTransition show={activePage === "transactions"}>
-                    <Transactions 
-                        items={items} 
-                        onAdd={addItem} 
-                        onUpdate={updateItem}
-                        onDelete={deleteItem}
-                    />
-                </PageTransition>
-
-                <PageTransition show={activePage === "reports"}>
-                    <Reports items={items} userProfile={userProfile} />
-                </PageTransition>
-
-                <PageTransition show={activePage === "settings"}>
-                    <Settings 
+                {loading ? <Skeleton /> : (
+                    <Router
+                        items={items}
                         userProfile={userProfile}
                         setUserProfile={setUserProfile}
                         notifications={notifications}
                         notificationSettings={notificationSettings}
                         setNotificationSettings={setNotificationSettings}
+                        addItem={addItem}
+                        updateItem={updateItem}
+                        deleteItem={deleteItem}
                         deleteNotification={deleteNotification}
                         markNotificationAsRead={markNotificationAsRead}
                         markAllNotificationsAsRead={markAllNotificationsAsRead}
-                        items={items}
-                        onUpdate={updateItem}
+                        theme={theme}
+                        setTheme={setTheme}
+                        onNavigate={switchPage}
                     />
-                </PageTransition>
+                )}
 
             </main>
 

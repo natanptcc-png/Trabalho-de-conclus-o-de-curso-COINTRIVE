@@ -1,0 +1,18 @@
+:root{--s-bg:#eef2f6;--s-shade:#e2e8f0}
+.skeleton-root{width:100%;max-width:1100px;margin:20px auto;padding:20px 22px}
+.skeleton-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.skeleton-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(90deg,var(--s-bg),#dce7f2)}
+.skeleton-title{height:20px;width:180px;border-radius:6px;background:linear-gradient(90deg,var(--s-bg),#dbe9f7)}
+.skeleton-bell{margin-left:auto;width:36px;height:36px;border-radius:8px;background:linear-gradient(90deg,var(--s-bg),#e6eef8)}
+.skeleton-carousel{display:flex;gap:12px;margin-bottom:16px}
+.skeleton-card{flex:1;height:120px;border-radius:12px;background:linear-gradient(90deg,var(--s-bg),#eef6fb)}
+.skeleton-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.skeleton-box{height:220px;border-radius:12px;background:linear-gradient(90deg,var(--s-bg),#f3f8fb)}
+.skeleton-box.pie{height:420px}
+
+@media(max-width:768px){
+  .skeleton-grid{grid-template-columns:1fr}
+  .skeleton-card{height:100px}
+  .skeleton-box{height:280px}
+  .skeleton-box.pie{height:260px}
+}

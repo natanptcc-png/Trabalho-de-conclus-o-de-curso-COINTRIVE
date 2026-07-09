@@ -17,6 +17,8 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [page, setPage] = useState(1);
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+    const [deleteConfirmDescription, setDeleteConfirmDescription] = useState("");
 
     const dateOptions = ["Este Mês", "Último Mês", "Último Ano", "Todo Período"];
 
@@ -34,11 +36,22 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
         setEditingId(null);
     };
 
-    const handleDeleteItem = (id) => {
-        if (confirm("Tem certeza que deseja deletar esta transação?")) {
-            onDelete(id);
-            showToast({ type: "info", message: "Transação deletada com sucesso." });
-        }
+    const handleDeleteItem = (id, description) => {
+        setDeleteConfirmId(id);
+        setDeleteConfirmDescription(description || "esta transação");
+    };
+
+    const confirmDeleteItem = () => {
+        if (!deleteConfirmId) return;
+        onDelete(deleteConfirmId);
+        showToast({ type: "info", message: "Transação deletada com sucesso." });
+        setDeleteConfirmId(null);
+        setDeleteConfirmDescription("");
+    };
+
+    const cancelDeleteConfirmation = () => {
+        setDeleteConfirmId(null);
+        setDeleteConfirmDescription("");
     };
 
     const handleExport = () => {
@@ -168,7 +181,7 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
                                 key={tx.id} 
                                 {...tx} 
                                 onEdit={() => { setEditingId(tx.id); setModalOpen(true); }}
-                                onDelete={() => handleDeleteItem(tx.id)}
+                                onDelete={() => handleDeleteItem(tx.id, tx.description)}
                             />
                         ))}
                     </tbody>
@@ -194,6 +207,19 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
                 editingItem={editingId ? items.find(i => i.id === editingId) : null}
                 onUpdate={handleEditItem}
             />
+
+            {deleteConfirmId && (
+                <div className="modal-overlay open" style={{ zIndex: 2400 }}>
+                    <div className="modal open" style={{ width: 'min(560px, calc(100% - 32px))' }}>
+                        <h3>Excluir Transação</h3>
+                        <p>Tem certeza que deseja excluir <strong>{deleteConfirmDescription}</strong>?</p>
+                        <div className="modal-actions">
+                            <button type="button" className="btn" onClick={cancelDeleteConfirmation}>Cancelar</button>
+                            <button type="button" className="btn primary" onClick={confirmDeleteItem}>Excluir</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

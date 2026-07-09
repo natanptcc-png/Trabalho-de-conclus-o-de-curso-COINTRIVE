@@ -36,11 +36,15 @@ const centerTextPlugin = {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        ctx.fillStyle = "#64748b";
+        const rootStyles = getComputedStyle(document.body);
+        const primary = (rootStyles.getPropertyValue("--text-primary") || "#1e293b").trim();
+        const secondary = (rootStyles.getPropertyValue("--text-secondary") || "#64748b").trim();
+
+        ctx.fillStyle = secondary;
         ctx.font = "600 13px system-ui";
         ctx.fillText("Total", centerX, centerY - 12);
 
-        ctx.fillStyle = "#1e293b";
+        ctx.fillStyle = primary;
         ctx.font = "700 15px system-ui";
 
         ctx.fillText(
@@ -95,13 +99,15 @@ export default function PieChartCard({ items = [] }) {
         "#FFC107",
     ];
 
+    const noDataBackgroundColor = document.body.classList.contains("dark-theme") ? "#ffffff" : "#e6e9ef";
+
     const data = {
         labels: chartData.labels.length === 0 ? ["Sem dados"] : chartData.labels,
         datasets: [
             {
                 data: chartData.data.length === 0 ? [1] : chartData.data,
                 backgroundColor: chartData.labels.length === 0 
-                    ? ["#e6e9ef"]
+                    ? [noDataBackgroundColor]
                     : chartData.labels.map((_, i) => colors[i % colors.length]),
                 borderWidth: 0,
                 hoverOffset: 6
@@ -152,6 +158,23 @@ export default function PieChartCard({ items = [] }) {
             }
         }
     };
+
+    // adapt legend and tooltip colors to current theme
+    try {
+        const rootStyles2 = getComputedStyle(document.body);
+        const primary2 = (rootStyles2.getPropertyValue("--text-primary") || "#1e293b").trim();
+
+        if (options.plugins && options.plugins.legend && options.plugins.legend.labels) {
+            options.plugins.legend.labels.color = primary2;
+        }
+        if (options.plugins && options.plugins.tooltip) {
+            options.plugins.tooltip.titleColor = primary2;
+            options.plugins.tooltip.bodyColor = primary2;
+            options.plugins.tooltip.backgroundColor = rootStyles2.getPropertyValue("--bg-card") || (document.body.classList.contains("dark-theme") ? "#0b1220" : "#ffffff");
+        }
+    } catch (e) {
+        // ignore
+    }
 
     return (
         <div className="chart-wrapper">
