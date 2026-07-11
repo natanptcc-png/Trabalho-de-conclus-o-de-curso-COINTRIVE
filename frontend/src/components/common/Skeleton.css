@@ -1,0 +1,92 @@
+:root{
+  --s-bg: #eef2f6;
+  --s-shade: #dbe9f7;
+  --s-highlight: rgba(255,255,255,0.75);
+}
+
+.skeleton-root{
+  width:100%;
+  max-width:1100px;
+  margin:20px auto;
+  padding:20px 22px;
+}
+
+.skeleton-header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+
+.skeleton-avatar,.skeleton-title-group,.skeleton-bell,.skeleton-card,.skeleton-box{position:relative;overflow:hidden}
+
+.skeleton-avatar{width:48px;height:48px;border-radius:50%;background:var(--s-bg)}
+
+.skeleton-title-group{display:flex;flex-direction:column;gap:8px}
+
+.skeleton-carousel{display:flex;gap:12px;margin-bottom:18px}
+
+.skeleton-card{flex:1;min-width:160px;height:120px;border-radius:12px;background:var(--s-bg);padding:12px;box-sizing:border-box}
+.s-card-title{height:18px;width:70%;border-radius:6px;background:transparent}
+.s-card-sub{height:12px;width:40%;border-radius:6px;background:transparent;margin-top:8px}
+
+.skeleton-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.skeleton-box{height:220px;border-radius:12px;background:var(--s-bg);padding:16px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between}
+.skeleton-box.pie{height:420px}
+
+.s-box-row{display:flex;gap:12px;align-items:center}
+.s-box-row.small{gap:8px}
+.s-line{height:12px;border-radius:8px;background:linear-gradient(90deg,var(--s-shade),var(--s-bg));flex:1}
+.s-line.short{width:28%}
+.s-line.title{height:20px;width:180px}
+.s-line.subtitle{height:14px;width:120px}
+.s-line.long{width:80%}
+.s-line.medium{width:56%}
+
+/* shimmer layer */
+.skeleton-avatar::before,
+.skeleton-card::before,
+.skeleton-box::before,
+.skeleton-bell::before,
+.skeleton-title-group::before,
+.s-line::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(90deg, transparent 0%, var(--s-highlight) 40%, var(--s-highlight) 60%, transparent 100%);
+  transform: translateX(-150%);
+  animation: shimmer 1.8s cubic-bezier(.4,0,.2,1) infinite;
+}
+
+/* subtle breathe */
+.skeleton-root{animation:breathe 3.6s ease-in-out infinite}
+
+@keyframes shimmer{
+  0%{transform:translateX(-150%)}
+  100%{transform:translateX(150%)}
+}
+
+@keyframes breathe{
+  0%,100%{filter:brightness(1);}
+  50%{filter:brightness(0.985);}
+}
+
+/* slight staggering by position for more natural look */
+.skeleton-carousel .skeleton-card:nth-child(1)::before{animation-delay:0s}
+.skeleton-carousel .skeleton-card:nth-child(2)::before{animation-delay:0.08s}
+.skeleton-carousel .skeleton-card:nth-child(3)::before{animation-delay:0.16s}
+.skeleton-grid .skeleton-box:nth-child(1)::before{animation-delay:0.02s}
+.skeleton-grid .skeleton-box:nth-child(2)::before{animation-delay:0.10s}
+.skeleton-grid .skeleton-box:nth-child(3)::before{animation-delay:0.18s}
+.skeleton-grid .skeleton-box:nth-child(4)::before{animation-delay:0.24s}
+
+@media(max-width:768px){
+  .skeleton-grid{grid-template-columns:1fr}
+  .skeleton-card{height:100px}
+  .skeleton-box{height:280px}
+  .skeleton-box.pie{height:260px}
+}
+
+/* respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-avatar::before, .skeleton-card::before, .skeleton-box::before, .skeleton-bell::before, .skeleton-title-group::before, .s-line::before {
+    animation: none;
+    opacity: 0.6;
+  }
+  .skeleton-root{animation:none}
+}

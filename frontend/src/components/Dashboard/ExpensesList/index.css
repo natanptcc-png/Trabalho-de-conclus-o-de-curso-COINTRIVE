@@ -1,14 +1,10 @@
-.expenses-card h2 {
-    margin-bottom: 20px;
-}
-
-.expenses-card ul {
-    list-style: none;
-}
-
-.expenses-card li {
-    padding: 14px;
-
-    border-bottom: 1px solid
-        var(--border-color);
-}
+.expenses-header{display:flex;align-items:center;justify-content:space-between}
+.expenses-header h2{margin:0;font-size:1.05rem}
+.compact-list{list-style:none;padding:0;margin-top:12px}
+.compact-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color)}
+.compact-item .left{display:flex;flex-direction:column}
+.compact-item .desc{font-weight:700;color:var(--text-primary)}
+.compact-item .meta{font-size:0.85rem;color:var(--text-secondary)}
+.compact-item .amount{font-weight:700;color:var(--text-primary)}
+.empty{color:var(--text-secondary);padding:12px;text-align:center}
+.btn-text{background:none;border:none;color:#3b82f6;font-weight:700;cursor:pointer}

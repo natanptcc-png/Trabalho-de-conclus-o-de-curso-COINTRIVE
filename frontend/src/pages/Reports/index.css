@@ -1,0 +1,229 @@
+.reports-container {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 20px 22px;
+}
+
+.reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 20px;
+}
+
+.reports-header h1 {
+    font-size: 2.2rem;
+    margin: 0;
+}
+
+.period-selector {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.period-selector select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.period-selector button {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.period-selector button:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.period-selector button.primary:hover {
+    background: #4f46e5;
+    color: #ffffff;
+}
+
+.overview-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.overview-cards .card {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid var(--border-color);
+}
+
+/* restored: no special no-bg styles - cards use default card styles */
+
+.overview-cards .card h3 {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.overview-cards .card .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.overview-cards .card .value.income {
+    color: #10b981;
+}
+
+.overview-cards .card .value.expense {
+    color: #ef4444;
+}
+
+.overview-cards .card .value.savings {
+    color: #3b82f6;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.chart-container {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid var(--border-color);
+}
+
+.chart-container h2 {
+    font-size: 1.1rem;
+    margin: 0 0 20px 0;
+    color: var(--text-primary);
+}
+
+.category-breakdown {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid var(--border-color);
+}
+
+.category-breakdown h2 {
+    font-size: 1.1rem;
+    margin: 0 0 16px 0;
+    color: var(--text-primary);
+}
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: 8px;
+}
+
+.category-item span:first-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.category-item span:last-child {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .reports-container {
+        padding: 14px 12px 92px;
+    }
+
+    .reports-header {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 20px;
+    }
+
+    .reports-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .period-selector {
+        flex-direction: column;
+    }
+
+    .period-selector select,
+    .period-selector button {
+        width: 100%;
+    }
+
+    .overview-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .overview-cards .card {
+        padding: 16px;
+    }
+
+    .overview-cards .card h3 {
+        font-size: 0.75rem;
+    }
+
+    .overview-cards .card .value {
+        font-size: 1.4rem;
+    }
+
+    .charts-grid {
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .chart-container {
+        padding: 16px;
+    }
+
+    .chart-container h2 {
+        font-size: 1rem;
+    }
+
+    .category-breakdown {
+        padding: 16px;
+    }
+
+    .category-breakdown h2 {
+        font-size: 1rem;
+    }
+}

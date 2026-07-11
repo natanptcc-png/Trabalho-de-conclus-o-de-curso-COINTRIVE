@@ -1,0 +1,56 @@
+------< LOGIN ENDPOINTS >------
+POST /login
+ {
+  "email": "user@example.com",
+  "password": "secret123"
+}
+
+POST /register
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "password": "secret123"
+}
+
+------< PROFILE ENDPOINTS >------
+GET /profile
+
+PATCH /profile
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "phone": "(11) 99999-9999",
+  "bio": "Organizo meu fluxo de caixa com Cointrive",
+  "currency": "BRL"
+}
+
+------< TRANSACTIONS ENDPOINTS >------
+GET /transactions
+
+POST /transactions
+{
+  "date": "2026-07-10",
+  "description": "Freelance income",
+  "category": "Income",
+  "type": "Receita",
+  "amount": "R$ 5.000,00",
+  "payment": "Transferência",
+  "isPaid": true
+}
+
+PUT /transactions/:id
+{
+  "date": "2026-07-11",
+  "description": "Updated income entry",
+  "category": "Income",
+  "type": "Receita",
+  "amount": "R$ 5.200,00",
+  "payment": "Transferência",
+  "isPaid": true
+}
+
+------< USERS ENDPOINTS >------
+GET /users
+
+GET /users/:id

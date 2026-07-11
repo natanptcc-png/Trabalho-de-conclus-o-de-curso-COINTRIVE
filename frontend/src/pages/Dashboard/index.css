@@ -22,7 +22,7 @@
 .welcome-container h1 {
     font-size: 2.2rem;
     font-weight: 700;
-    color: #13294b;
+    color: var(--text-primary);
     line-height: 1.1;
 }
 
@@ -39,6 +39,13 @@
     gap: 18px;
     margin-top: 16px;
     align-items: stretch;
+}
+
+.content-grid .pie-full {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* ---------- CHART CARD ---------- */
@@ -73,8 +80,19 @@
     width: 100% !important;
     height: 100% !important;
 
-    max-width: 340px;
-    max-height: 340px;
+    max-width: 760px;
+    max-height: 760px;
+}
+
+@media (min-width: 1200px) {
+    .pie-container {
+        min-height: 560px;
+    }
+
+    .pie-container canvas {
+        max-width: 760px;
+        max-height: 760px;
+    }
 }
 
 /* ---------------- CAROUSEL ---------------- */
@@ -139,6 +157,19 @@
 
     .pie-container {
         height: 260px;
+    }
+
+    .pie-container canvas {
+        max-width: 380px;
+        max-height: 380px;
+    }
+
+    /* larger desktop-like screens (between tablet and very large) */
+    @media (min-width: 1100px) {
+        .pie-container canvas {
+            max-width: 520px;
+            max-height: 520px;
+        }
     }
 
     .welcome-container h1 {

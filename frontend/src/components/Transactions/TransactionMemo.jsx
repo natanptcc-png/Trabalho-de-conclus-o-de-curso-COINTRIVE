@@ -1,15 +1,12 @@
-export default function TransactionMemo({ id, date, description, category, type, amount, payment }) {
+export default function TransactionMemo({ id, date, description, category, type, amount, payment, onEdit, onDelete }) {
 
     const tagClass = type === "Renda" ? "tag income" : "tag expense";
 
     const displayDate = (d) => {
         if (!d) return "";
-        if (d.includes('-')) {
-            const [y,m,day] = d.split('-');
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+            const [y, m, day] = d.split('-');
             return `${day}/${m}/${y}`;
-        }
-        if (d.includes('/')) {
-            return d;
         }
         const parsed = new Date(d);
         if (!isNaN(parsed)) {
@@ -43,6 +40,13 @@ export default function TransactionMemo({ id, date, description, category, type,
             <td>
                 <div className="mobile-label">MÉTODO</div>
                 {payment}
+            </td>
+            <td>
+                <div className="mobile-label">AÇÕES</div>
+                <div className="transaction-actions">
+                    <button className="action-btn edit" onClick={onEdit} title="Editar">✎</button>
+                    <button className="action-btn delete" onClick={onDelete} title="Deletar">✕</button>
+                </div>
             </td>
         </tr>
     );

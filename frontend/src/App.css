@@ -10,6 +10,7 @@
     --income-color: #ffffff;
     --expense-color: #ffffff;
     --wallet-color: #ffffff;
+    --success-color: #10b981;
 
     --border-color: #e2e8f0;
 
@@ -29,6 +30,44 @@
     --sidebar-width: 220px;
 }
 
+/* Dark theme variables */
+.dark-theme {
+    --bg-primary: #0b1220;
+    --bg-card: #0f1724;
+
+    --text-primary: #e6eef8;
+    --text-secondary: #9aa7b6;
+
+    --income-color: #0ea5a3;
+    --expense-color: #f97316;
+    --wallet-color: #38bdf8;
+    --success-color: #0ea5a3;
+
+    --border-color: #1f2937;
+
+    --shadow-sm: 0 6px 20px rgba(2,6,23,0.6);
+    --shadow-md: 0 12px 36px rgba(2,6,23,0.7);
+}
+
+/* Override browser autofill background in dark theme (Chrome, Edge) */
+.dark-theme input:-webkit-autofill,
+.dark-theme input:-webkit-autofill:hover,
+.dark-theme input:-webkit-autofill:focus,
+.dark-theme textarea:-webkit-autofill,
+.dark-theme textarea:-webkit-autofill:hover,
+.dark-theme textarea:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px var(--bg-card) inset !important;
+    box-shadow: 0 0 0px 1000px var(--bg-card) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Firefox autofill */
+input:-moz-autofill, textarea:-moz-autofill {
+    box-shadow: 0 0 0px 1000px var(--bg-card) inset !important;
+    -moz-text-fill-color: var(--text-primary) !important;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -43,6 +82,30 @@ body {
     color: var(--text-primary);
 
     min-height: 100vh;
+}
+
+body.modal-open {
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Dark-mode icon + svg color enforcement */
+.dark-theme svg,
+.dark-theme .nav-icon,
+.dark-theme .notification-bell,
+.dark-theme button,
+.dark-theme .nav-item {
+    color: var(--text-primary) !important;
+}
+
+.dark-theme .mobile-avatar {
+    color: #1e293b !important;
+}
+
+/* Make default card backgrounds use the variable */
+.card,
+.dark-theme .card {
+    background: var(--bg-card);
 }
 
 .modal input,
@@ -77,27 +140,43 @@ body {
     justify-content: center;
 }
 
+.dashboard-area.no-sidebar {
+    margin-left: 0;
+    width: 100%;
+}
+
 .mobile-header {
     display: none;
 }
+
+.desktop-notif{position:fixed;top:18px;right:24px;z-index:1200}
+
+.notification-bell{background:none;border:none;font-size:1.2rem;cursor:pointer;position:relative;padding:8px;display:inline-flex;align-items:center;gap:6px}
+.notification-bell .badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:white;border-radius:999px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700}
 
 .mobile-avatar {
     width: 42px;
     height: 42px;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     border: none;
     border-radius: 50%;
 
     background: #3d4db7;
-    color: white;
+    color: #1e293b;
 
     font-weight: bold;
+    font-size: 0.9rem;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
-
-    .dashboard-area {
+    .dashboard-area,
+    .dashboard-area.no-sidebar {
         margin-left: 0;
         width: 100%;
         display: block;
@@ -105,25 +184,48 @@ body {
 
     .mobile-header {
         display: flex;
-
         align-items: center;
         gap: 12px;
-
         padding: 16px;
-
         background: var(--bg-card);
-
         box-shadow: var(--shadow-sm);
-
         position: sticky;
         top: 0;
         left: 0;
         right: 0;
-
         z-index: 1100;
     }
-}
 
+    .desktop-notif {
+        display: none;
+    }
+
+    .notification-bell {
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        cursor: pointer;
+        position: relative;
+        padding: 4px;
+        margin-left: auto;
+    }
+
+    .notification-bell .badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background: #ef4444;
+        color: white;
+        border-radius: 999px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+    }
+}
 /* Page transition animations */
 .page-transition {
     width: 100%;

@@ -7,6 +7,7 @@ const categories = [
     "Saúde",
     "Utilidades",
     "Entretenimento",
+    "Contas",
     "Outro",
 ];
 

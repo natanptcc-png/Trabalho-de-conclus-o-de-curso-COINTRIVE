@@ -1,35 +1,52 @@
 import "./index.css"
 
-export default function ExpensesList() {
-    const expenses = [
-        {
-            item: "Netflix", custo: "69,00" , data: "22-06-2026"
-        },
-        {
-            item: "Internet", custo: "180,00" , data: "12-06-2026"
-        },
-        {
-            item: "Eletricidade", custo: "200,00" , data: "15-06-2026"
-        },
-        {
-            item: "Spotify", custo: "59,99" , data: "25-06-2026"
+export default function ExpensesList({ items = [], onNavigate }) {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    const expenses = items
+        .filter(item => item.type === "Gastos")
+        .filter(item => {
+            const txDate = new Date(item.date);
+            return txDate >= startOfMonth && txDate <= endOfMonth;
+        })
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
+
+    const formatDate = (date) => {
+        if (date.includes('-')) {
+            const [y, m, d] = date.split('-');
+            return `${d}/${m}/${y}`;
         }
-    ];
+        return date;
+    };
+
+    const extractAmount = (amount) => {
+        return amount.replace(/[^\d.,]/g, "");
+    };
 
     return (
         <>
-            <h2>Gastos Recentes</h2>
+                <div className="expenses-header">
+                <h2>Gastos Recentes</h2>
+                <button className="btn-text" onClick={() => onNavigate && onNavigate("transactions")}>Ver tudo</button>
+            </div>
 
-            <ul>
-                {expenses.map((exp, index) => (
-                    <div key={index}>
-                        <li>
-                            <span style={{lineHeight: '2', fontSize: '1.5em'}}><b>{exp.item}</b></span> <br /> 
-                            <i><strong> R${exp.custo} </strong></i> <br />
-                            {exp.data}
+            <ul className="compact-list">
+                {expenses.length === 0 ? (
+                    <li className="empty">Nenhum gasto registrado este mês</li>
+                ) : (
+                    expenses.map((exp, index) => (
+                        <li key={index} className="compact-item">
+                            <div className="left">
+                                <div className="desc">{exp.description}</div>
+                                <div className="meta">{formatDate(exp.date)}</div>
+                            </div>
+                            <div className="amount">R$ {extractAmount(exp.amount)}</div>
                         </li>
-                    </div>
-                ))}
+                    ))
+                )}
             </ul>
         </>
     );

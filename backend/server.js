@@ -1,11 +1,14 @@
 require('dotenv').config();
 
 const express = require('express');
-const cors = require("cors");
-const db = require("./db");
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const db = require('./db');
 
 const API = express();
-const PORT = 4040;
+const PORT = process.env.PORT || 4040;
+const JWT_TKN = process.env.JWT_TKN || 'dev-secret-key';
 
 API.use(express.json());
 API.use(cors());
@@ -16,76 +19,179 @@ API.use(cors());
 
 ////////////////////////////////////////
 
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-
 function authorizeRole(...allowedRoles) {
     return (req, res, next) => {
         if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ error: "Forbidden" });
+            return res.status(403).json({ error: 'Forbidden' });
         }
         next();
     };
 }
 
 function authenticateToken(req, res, next) {
-    const authHeader = req.headers["authorization"];
-
+    const authHeader = req.headers['authorization'];
     if (!authHeader) {
-        return res.status(401).json({ error: "Access denied" });
+        return res.status(401).json({ error: 'Access denied' });
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied' });
+    }
 
     jwt.verify(token, JWT_TKN, (err, user) => {
         if (err) {
-            return res.status(403).json({ error: "Invalid token" });
+            return res.status(403).json({ error: 'Invalid token' });
         }
 
         req.user = user;
-
         next();
     });
 }
 
-API.post("/login", async (req, res) => {
+async function findUserByEmail(email) {
+    const [rows] = await db.query(
+        `SELECT id, first_name, last_name, email, password, phone, bio, currency, role
+         FROM bd_users
+         WHERE email = ?`,
+        [String(email || '').trim().toLowerCase()]
+    );
+    return rows[0];
+}
+
+async function findUserById(id) {
+    const [rows] = await db.query(
+        `SELECT id, first_name, last_name, email, phone, bio, currency, role
+         FROM bd_users
+         WHERE id = ?`,
+        [id]
+    );
+    return rows[0];
+}
+
+async function findUserByIdWithPassword(id) {
+    const [rows] = await db.query(
+        `SELECT id, first_name, last_name, email, password, phone, bio, currency, role
+         FROM bd_users
+         WHERE id = ?`,
+        [id]
+    );
+    return rows[0];
+}
+
+function mapUserProfile(row) {
+    if (!row) return null;
+    return {
+        id: row.id,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        email: row.email,
+        phone: row.phone || '',
+        bio: row.bio || '',
+        currency: row.currency || 'BRL',
+        role: row.role || 'user',
+    };
+}
+
+function createToken(user) {
+    return jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role || 'user',
+        },
+        JWT_TKN,
+        { expiresIn: '8h' }
+    );
+}
+
+////////////////////////////////////////
+
+/////////////////////////// AUTHENTICATION
+
+////////////////////////////////////////
+
+API.post('/login', async (req, res) => {
     try {
-        
-        
-    } catch(err) {
-        return res.status(500).json(err);
-    }
-})
-
-API.post("/register", async (req,res) => {
-    try {
-
-        const { first_name, last_name, email, password } = req.body;
-
-        if (!first_name || !last_name || !email || !password) {
-            return res.status(400).json({err: "Missing data."});
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email e senha são necessários.' });
         }
 
-        const hashed_pass = bcrypt.hash(password, 10);
+        const user = await findUserByEmail(email);
+        if (!user) {
+            return res.status(401).json({ error: 'Email ou senha inválidos.' });
+        }
 
-        const [create_user] = await db.query(
-            `INSERT INTO bd_users (first_name, last_name, email, password) VALUES (?, ?, ?, ?, ?)`,
-            [first_name, last_name, email, hashed_pass]
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Email ou senha inválidos.' });
+        }
+
+        const token = createToken(mapUserProfile(user));
+        const [transactions] = await db.query(
+            `SELECT id, userId, DATE_FORMAT(date, '%Y-%m-%d') AS date, description, category, type, amount, payment, isPaid
+             FROM bd_transactions
+             WHERE userId = ?
+             ORDER BY date DESC`,
+            [user.id]
         );
 
-        const getUserID = create_user.insertId;
-
-        const [create_wallet] = await db.query(
-            `INSERT INTO bd_user_wallet (userId, income, expense, balance) VALUES (?, ?, ?, ?)`,
-            [getUserID, 0.00, 0.00, 0.00]
-        );
-
-        return res.status(200).json({msg: "Created user successfully"});
-
-    } catch(err) {
-        return res.status(500).json(err);
+        return res.status(200).json({
+            token,
+            user: mapUserProfile(user),
+            transactions,
+        });
+    } catch (err) {
+        return res.status(500).json({ error: 'Login failed.', details: err.message });
     }
-})
+});
+
+API.post('/register', async (req, res) => {
+    try {
+        const { firstName, lastName, email, password } = req.body;
+        const normalizedEmail = String(email || '').trim().toLowerCase();
+
+        if (!normalizedEmail || !password) {
+            return res.status(400).json({ error: 'Email e senha são necessários.' });
+        }
+
+        const existingUser = await findUserByEmail(normalizedEmail);
+        if (existingUser) {
+            return res.status(409).json({ error: 'Email já em uso.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const [insertResult] = await db.query(
+            `INSERT INTO bd_users
+             (first_name, last_name, email, password, phone, bio, currency, role)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                String(firstName || 'Novo').trim(),
+                String(lastName || 'Usuário').trim(),
+                normalizedEmail,
+                hashedPassword,
+                '',
+                '',
+                'BRL',
+                'user',
+            ]
+        );
+
+        const user = await findUserById(insertResult.insertId);
+        const token = createToken(mapUserProfile(user));
+
+        return res.status(201).json({
+            token,
+            user: mapUserProfile(user),
+            transactions: [],
+        });
+    } catch (err) {
+        return res.status(500).json({ error: 'Register failed.', details: err.message });
+    }
+});
 
 ////////////////////////////////////////
 
@@ -93,41 +199,260 @@ API.post("/register", async (req,res) => {
 
 ////////////////////////////////////////
 
-API.get("/users", async (req, res) => {
+API.get('/profile', authenticateToken, async (req, res) => {
     try {
-
-        const [result] = await db.query(
-            `SELECT first_name, last_name, email, role FROM bd_users`
-        )
-
-        return res.status(200).json(result);
-
-    } catch(err) {
-        return res.status(500).json(err);
+        const user = await findUserById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        return res.status(200).json(mapUserProfile(user));
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to load profile.', details: err.message });
     }
-})
+});
 
-API.get("/users/:id", async (req, res) => {
+API.patch('/profile', authenticateToken, async (req, res) => {
     try {
+        const { firstName, lastName, phone, bio, currency, currentPassword, newPassword } = req.body;
+        const updates = [];
+        const values = [];
 
-        const USER_ID = req.params.id;
-
-        const [result] = await db.query(
-            `SELECT first_name, last_name, email, role FROM bd_users WHERE id = ?`,
-            [USER_ID]
-        )
-
-        if (result.length === 0) {
-            return res.status(404).json({err: "User not found."})
+        if (firstName !== undefined) {
+            updates.push('first_name = ?');
+            values.push(String(firstName || '').trim());
+        }
+        if (lastName !== undefined) {
+            updates.push('last_name = ?');
+            values.push(String(lastName || '').trim());
+        }
+        if (phone !== undefined) {
+            updates.push('phone = ?');
+            values.push(String(phone || '').trim());
+        }
+        if (bio !== undefined) {
+            updates.push('bio = ?');
+            values.push(String(bio || '').trim());
+        }
+        if (currency !== undefined) {
+            updates.push('currency = ?');
+            values.push(String(currency || 'BRL').trim());
         }
 
-        return res.status(200).json(result);
+        if (newPassword !== undefined) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Current password is required to change password.' });
+            }
+            const user = await findUserByIdWithPassword(req.user.id);
+            if (!user) {
+                return res.status(404).json({ error: 'User not found.' });
+            }
+            const validPassword = await bcrypt.compare(String(currentPassword), user.password);
+            if (!validPassword) {
+                return res.status(401).json({ error: 'Current password is incorrect.' });
+            }
+            const hashedPassword = await bcrypt.hash(String(newPassword), 10);
+            updates.push('password = ?');
+            values.push(hashedPassword);
+        }
 
-    } catch(err) {
-        return res.status(500).json(err);
+        if (updates.length > 0) {
+            await db.query(
+                `UPDATE bd_users
+                 SET ${updates.join(', ')}
+                 WHERE id = ?`,
+                [...values, req.user.id]
+            );
+        }
+
+        const user = await findUserById(req.user.id);
+        return res.status(200).json(mapUserProfile(user));
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to update profile.', details: err.message });
     }
-})
+});
 
-API.listen(PORT, ()=>{
-    console.log(`Logged in to host http://localhost:${PORT}`)
-})
+API.patch('/profile/password', authenticateToken, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current and new passwords are required.' });
+        }
+
+        const user = await findUserByIdWithPassword(req.user.id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        const validPassword = await bcrypt.compare(String(currentPassword), user.password);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Current password is incorrect.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(String(newPassword), 10);
+        await db.query(
+            `UPDATE bd_users
+             SET password = ?
+             WHERE id = ?`,
+            [hashedPassword, req.user.id]
+        );
+
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to change password.', details: err.message });
+    }
+});
+
+////////////////////////////////////////
+
+/////////////////////////// TRANSACTIONS
+
+API.get('/transactions', authenticateToken, async (req, res) => {
+    try {
+        const [transactions] = await db.query(
+            `SELECT id, userId, DATE_FORMAT(date, '%Y-%m-%d') AS date, description, category, type, amount, payment, isPaid
+             FROM bd_transactions
+             WHERE userId = ?
+             ORDER BY date DESC`,
+            [req.user.id]
+        );
+        return res.status(200).json(transactions);
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to load transactions.', details: err.message });
+    }
+});
+
+API.post('/transactions', authenticateToken, async (req, res) => {
+    try {
+        const { date, description, category, type, amount, payment, isPaid } = req.body;
+        const normalizedDate = (() => {
+            const raw = String(date || new Date().toISOString().slice(0, 10));
+            const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+            return match ? match[1] : raw.slice(0, 10);
+        })();
+
+        const [insertResult] = await db.query(
+            `INSERT INTO bd_transactions
+             (userId, date, description, category, type, amount, payment, isPaid)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                req.user.id,
+                normalizedDate,
+                String(description || 'Nova transação').trim(),
+                String(category || 'Outros').trim(),
+                String(type || 'Gastos').trim(),
+                String(amount || '- R$ 0,00').trim(),
+                String(payment || 'Outro').trim(),
+                isPaid === null ? null : Boolean(isPaid),
+            ]
+        );
+
+        const [rows] = await db.query(
+            `SELECT id, userId, DATE_FORMAT(date, '%Y-%m-%d') AS date, description, category, type, amount, payment, isPaid
+             FROM bd_transactions
+             WHERE id = ?`,
+            [insertResult.insertId]
+        );
+
+        return res.status(201).json(rows[0]);
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to create transaction.', details: err.message });
+    }
+});
+
+API.put('/transactions/:id', authenticateToken, async (req, res) => {
+    try {
+        const txId = Number(req.params.id);
+        const { date, description, category, type, amount, payment, isPaid } = req.body;
+        const normalizedDate = (() => {
+            const raw = String(date || '');
+            const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+            return match ? match[1] : raw.slice(0, 10);
+        })();
+
+        const [existing] = await db.query(
+            `SELECT id FROM bd_transactions WHERE id = ? AND userId = ?`,
+            [txId, req.user.id]
+        );
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Transaction not found.' });
+        }
+
+        await db.query(
+            `UPDATE bd_transactions
+             SET date = ?, description = ?, category = ?, type = ?, amount = ?, payment = ?, isPaid = ?
+             WHERE id = ?`,
+            [
+                normalizedDate,
+                String(description || '').trim(),
+                String(category || '').trim(),
+                String(type || '').trim(),
+                String(amount || '').trim(),
+                String(payment || '').trim(),
+                isPaid === null ? null : Boolean(isPaid),
+                txId,
+            ]
+        );
+
+        const [rows] = await db.query(
+            `SELECT id, userId, DATE_FORMAT(date, '%Y-%m-%d') AS date, description, category, type, amount, payment, isPaid
+             FROM bd_transactions WHERE id = ?`,
+            [txId]
+        );
+        return res.status(200).json(rows[0]);
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to update transaction.', details: err.message });
+    }
+});
+
+API.delete('/transactions/:id', authenticateToken, async (req, res) => {
+    try {
+        const txId = Number(req.params.id);
+        const [existing] = await db.query(
+            `SELECT id FROM bd_transactions WHERE id = ? AND userId = ?`,
+            [txId, req.user.id]
+        );
+        if (existing.length === 0) {
+            return res.status(404).json({ error: 'Transaction not found.' });
+        }
+
+        await db.query(`DELETE FROM bd_transactions WHERE id = ?`, [txId]);
+        return res.status(200).json({ id: txId });
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to delete transaction.', details: err.message });
+    }
+});
+
+////////////////////////////////////////
+
+/////////////////////////// USER LIST
+
+////////////////////////////////////////
+
+API.get('/users', authenticateToken, async (req, res) => {
+    try {
+        const [users] = await db.query(
+            `SELECT id, first_name AS firstName, last_name AS lastName, email, phone, bio, currency, role
+             FROM bd_users`
+        );
+        return res.status(200).json(users);
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to load users.', details: err.message });
+    }
+});
+
+API.get('/users/:id', authenticateToken, async (req, res) => {
+    try {
+        const userId = Number(req.params.id);
+        const user = await findUserById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+        return res.status(200).json(mapUserProfile(user));
+    } catch (err) {
+        return res.status(500).json({ error: 'Unable to load user.', details: err.message });
+    }
+});
+
+API.listen(PORT, () => {
+    console.log(`Logged in to host http://localhost:${PORT}`);
+});
