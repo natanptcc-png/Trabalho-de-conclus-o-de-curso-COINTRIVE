@@ -34,6 +34,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    margin-bottom: 20px;
 }
 
 .brand-logo img {
@@ -56,7 +57,7 @@
 
     border-radius: 50%;
     background: #3949ab;
-    color: #fff;
+    color: #1e293b;
 
     font-weight: bold;
     flex-shrink: 0;

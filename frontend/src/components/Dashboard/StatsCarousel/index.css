@@ -63,6 +63,10 @@
     justify-content: center;
 
     gap: 24px;
+    background-color: var(--bg-card);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 }
 
 .stat-card img {
@@ -103,6 +107,7 @@
 .stat-card.income {
     background-image: url("/bgs/income_bg.png");
     background-size: cover;
+    background-position: center 15%;
 }
 
 .stat-card.expense {
@@ -181,7 +186,7 @@
 .dark-theme .stat-card.income {
     background-image: url("/bgs/income_bg.png");
     background-size: cover;
-    background-position: center;
+    background-position: center 15%;
 }
 
 .dark-theme .stat-card.expense {

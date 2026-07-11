@@ -4,12 +4,9 @@ export default function TransactionMemo({ id, date, description, category, type,
 
     const displayDate = (d) => {
         if (!d) return "";
-        if (d.includes('-')) {
-            const [y,m,day] = d.split('-');
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+            const [y, m, day] = d.split('-');
             return `${day}/${m}/${y}`;
-        }
-        if (d.includes('/')) {
-            return d;
         }
         const parsed = new Date(d);
         if (!isNaN(parsed)) {

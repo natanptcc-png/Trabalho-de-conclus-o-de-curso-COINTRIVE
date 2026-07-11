@@ -90,6 +90,20 @@
     font-size: 1rem;
 }
 
+/* Make the read-only email input look like normal info text */
+.info-item input[readonly] {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+.info-item input[readonly]:focus {
+    outline: none;
+    box-shadow: none;
+}
+
 /* Form Groups */
 .form-group {
     display: flex;
@@ -112,6 +126,15 @@
     font-size: 1rem;
     background: var(--bg-card);
     color: var(--text-primary);
+}
+
+/* Disabled / read-only inputs */
+.form-group input[disabled], .info-item input[disabled] {
+    background: #f3f4f6;
+    color: #6b7280; /* muted */
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .form-group input:focus {
@@ -236,14 +259,14 @@
     padding: 16px;
     background: var(--bg-card);
     border-radius: 8px;
-    border-left: 4px solid var(--income-color);
+    border-left: 4px solid var(--success-color);
     transition: opacity 0.2s;
 }
 
     .conta-item.paid {
     opacity: 0.6;
     background: var(--bg-card);
-    border-left-color: var(--income-color);
+    border-left-color: var(--success-color);
 }
 
 .conta-info {
@@ -263,12 +286,12 @@
 }
 
 .conta-info .amount {
-    color: var(--expense-color);
+    color: var(--text-primary);
     font-weight: 700;
 }
 
 .btn-toggle-paid {
-    background: var(--income-color);
+    background: var(--success-color);
     color: white;
     border: none;
     padding: 8px 16px;
@@ -281,15 +304,15 @@
 }
 
 .btn-toggle-paid:hover {
-    background: var(--income-color);
+    background: rgba(16, 185, 129, 0.9);
 }
 
 .btn-toggle-paid.paid {
-    background: var(--income-color);
+    background: rgba(16, 185, 129, 0.95);
 }
 
 .btn-toggle-paid.paid:hover {
-    background: var(--income-color);
+    background: rgba(16, 185, 129, 0.85);
 }
 
 /* Badge */
@@ -337,7 +360,7 @@
     flex: 1;
 }
 
-..notification-content h4 {
+.notification-content h4 {
     font-size: 1rem;
     margin: 0 0 4px 0;
     color: var(--text-primary);

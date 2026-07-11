@@ -2,7 +2,7 @@ import "./index.css";
 import { useMemo, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from "chart.js";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx/dist/xlsx.full.min.js";
 import { showToast } from "../../utils/toast";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);

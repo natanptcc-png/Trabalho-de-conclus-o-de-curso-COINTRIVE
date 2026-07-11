@@ -3,8 +3,8 @@ import TransactionMemo from "../../components/Transactions/TransactionMemo";
 import NewTransactionModal from "../../components/Transactions/NewTransactionModal";
 import categories from "../../data/categories";
 import CategorySelect from "../../components/Transactions/CategorySelect";
-import { useState, useMemo } from "react";
-import * as XLSX from "xlsx";
+import { useState, useMemo, useEffect } from "react";
+import * as XLSX from "xlsx/dist/xlsx.full.min.js";
 import { showToast } from "../../utils/toast";
 
 export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
@@ -20,20 +20,39 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
     const [deleteConfirmDescription, setDeleteConfirmDescription] = useState("");
 
+    useEffect(() => {
+        if (deleteConfirmId) {
+            document.body.classList.add("modal-open");
+        } else {
+            document.body.classList.remove("modal-open");
+        }
+        return () => {
+            document.body.classList.remove("modal-open");
+        };
+    }, [deleteConfirmId]);
+
     const dateOptions = ["Este Mês", "Último Mês", "Último Ano", "Todo Período"];
 
-    const handleAddItem = (tx) => {
-        const normalized = onAdd(tx);
-        setPage(1);
-        showToast({ type: "success", title: "Transação criada", message: `${normalized.description} foi adicionada com sucesso.` });
-        setModalOpen(false);
+    const handleAddItem = async (tx) => {
+        try {
+            const normalized = await onAdd(tx);
+            setPage(1);
+            showToast({ type: "success", title: "Transação criada", message: `${normalized.description} foi adicionada com sucesso.` });
+            setModalOpen(false);
+        } catch (error) {
+            showToast({ type: "error", title: "Erro", message: error?.message || "Não foi possível criar a transação." });
+        }
     };
 
-    const handleEditItem = (tx) => {
-        onUpdate(editingId, tx);
-        showToast({ type: "success", title: "Transação atualizada", message: `${tx.description} foi atualizada com sucesso.` });
-        setModalOpen(false);
-        setEditingId(null);
+    const handleEditItem = async (tx) => {
+        try {
+            await onUpdate(editingId, tx);
+            showToast({ type: "success", title: "Transação atualizada", message: `${tx.description} foi atualizada com sucesso.` });
+            setModalOpen(false);
+            setEditingId(null);
+        } catch (error) {
+            showToast({ type: "error", title: "Erro", message: error?.message || "Não foi possível atualizar a transação." });
+        }
     };
 
     const handleDeleteItem = (id, description) => {
@@ -41,12 +60,17 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
         setDeleteConfirmDescription(description || "esta transação");
     };
 
-    const confirmDeleteItem = () => {
+    const confirmDeleteItem = async () => {
         if (!deleteConfirmId) return;
-        onDelete(deleteConfirmId);
-        showToast({ type: "info", message: "Transação deletada com sucesso." });
-        setDeleteConfirmId(null);
-        setDeleteConfirmDescription("");
+        try {
+            await onDelete(deleteConfirmId);
+            showToast({ type: "info", message: "Transação deletada com sucesso." });
+        } catch (error) {
+            showToast({ type: "error", title: "Erro", message: error?.message || "Não foi possível excluir a transação." });
+        } finally {
+            setDeleteConfirmId(null);
+            setDeleteConfirmDescription("");
+        }
     };
 
     const cancelDeleteConfirmation = () => {

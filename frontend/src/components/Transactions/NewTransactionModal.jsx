@@ -64,6 +64,17 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
         return () => clearTimeout(timeoutRef.current);
     }, [open]);
 
+    useEffect(() => {
+        if (visible) {
+            document.body.classList.add("modal-open");
+        } else {
+            document.body.classList.remove("modal-open");
+        }
+        return () => {
+            document.body.classList.remove("modal-open");
+        };
+    }, [visible]);
+
     const handleClose = () => {
         // run closing animation then notify parent
         setConfirmOpen(false);
@@ -79,7 +90,10 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
     };
 
     const parseDateValue = (value) => {
-        return value;
+        if (!value) return new Date().toISOString().slice(0, 10);
+        const raw = String(value);
+        const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+        return match ? match[1] : raw;
     };
 
     const formatAmountValue = (value) => {

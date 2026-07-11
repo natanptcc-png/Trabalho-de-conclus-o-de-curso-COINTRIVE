@@ -2,9 +2,11 @@ import "./index.css";
 
 import { LayoutDashboard, ArrowLeftRight, Summary, Settings, SkipBack } from "lucide-react"
 
-export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, userProfile }) {
+export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, onLogout, userProfile }) {
 
-    const first = (userProfile?.firstName || "").trim();
+    const firstName = (userProfile?.firstName || "").trim();
+    const firstNamePiece = firstName.split(/\s+/).filter(Boolean)[0] || firstName;
+
     const getFirstLastName = (lastName) => {
         if (!lastName) return "";
         const skip = ["do", "dos", "de"];
@@ -14,9 +16,9 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, userProfile
     };
 
     const lastFirst = getFirstLastName(userProfile?.lastName || "");
-    const displayName = `${first} ${lastFirst}`.trim().toUpperCase();
+    const displayName = `${firstNamePiece} ${lastFirst}`.trim().toUpperCase();
 
-    const initials = `${(first.charAt(0)||"").toUpperCase()}${(lastFirst.charAt(0)||"").toUpperCase()}`;
+    const initials = `${(firstNamePiece.charAt(0)||"").toUpperCase()}${(lastFirst.charAt(0)||"").toUpperCase()}`;
 
     const getAvatarColor = (name) => {
         if (!name) return "hsl(220 30% 80%)";
@@ -26,7 +28,7 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, userProfile
         return `hsl(${hue} 30% 80%)`;
     };
 
-    const avatarBg = getAvatarColor(first || "A");
+    const avatarBg = getAvatarColor(firstNamePiece || "A");
 
     return (
         <>
@@ -51,7 +53,7 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, userProfile
 
                     <div className="profile">
 
-                        <div className="avatar" style={{ background: avatarBg, color: 'var(--text-primary)', fontWeight: 700 }}>
+                        <div className="avatar" style={{ background: avatarBg, color: '#1e293b', fontWeight: 700 }}>
                             {initials}
                         </div>
 
@@ -99,7 +101,7 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, userProfile
 
                     <hr />
 
-                    <button className="nav-item sign-off">
+                    <button type="button" className="nav-item sign-off" onClick={() => onLogout && onLogout()}>
                         <SkipBack className='nav-icon' /> Sair
                     </button>
 

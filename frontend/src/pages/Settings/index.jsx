@@ -1,5 +1,5 @@
 import "./index.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { showToast } from "../../utils/toast";
 
 export default function Settings({
@@ -15,9 +15,15 @@ export default function Settings({
     onUpdate,
     theme,
     setTheme,
+    onUpdateProfile,
+    onChangePassword,
 }) {
     const [editMode, setEditMode] = useState(false);
     const [tempProfile, setTempProfile] = useState(userProfile);
+
+    useEffect(() => {
+        setTempProfile(userProfile);
+    }, [userProfile]);
     const [showPasswordForm, setShowPasswordForm] = useState(false);
     const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
 
@@ -25,17 +31,37 @@ export default function Settings({
         setTempProfile(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSaveProfile = () => {
+    const handleSaveProfile = async () => {
         if (!tempProfile.firstName.trim() || !tempProfile.lastName.trim()) {
             showToast({ type: "error", message: "Nome e sobrenome são obrigatórios." });
             return;
         }
-        setUserProfile(tempProfile);
+
+        if (onUpdateProfile) {
+            const result = await onUpdateProfile({
+                firstName: tempProfile.firstName.trim(),
+                lastName: tempProfile.lastName.trim(),
+                phone: tempProfile.phone || '',
+                bio: tempProfile.bio || '',
+                currency: tempProfile.currency || 'BRL',
+            });
+
+            if (!result.success) {
+                showToast({ type: "error", message: result.message || "Falha ao atualizar perfil." });
+                return;
+            }
+
+            setUserProfile(result.user);
+            setTempProfile(result.user);
+        } else {
+            setUserProfile(tempProfile);
+        }
+
         setEditMode(false);
         showToast({ type: "success", message: "Perfil atualizado com sucesso." });
     };
 
-    const handlePasswordChange = () => {
+    const handlePasswordChange = async () => {
         if (!passwords.current || !passwords.new || !passwords.confirm) {
             showToast({ type: "error", message: "Todos os campos são obrigatórios." });
             return;
@@ -48,7 +74,19 @@ export default function Settings({
             showToast({ type: "error", message: "A senha deve ter pelo menos 8 caracteres." });
             return;
         }
-        // In real app, send to backend
+
+        if (onChangePassword) {
+            const result = await onChangePassword({
+                currentPassword: passwords.current,
+                newPassword: passwords.new,
+            });
+
+            if (!result.success) {
+                showToast({ type: "error", message: result.message || "Falha ao alterar senha." });
+                return;
+            }
+        }
+
         showToast({ type: "success", message: "Senha alterada com sucesso." });
         setShowPasswordForm(false);
         setPasswords({ current: "", new: "", confirm: "" });
@@ -114,7 +152,7 @@ export default function Settings({
                                 </div>
                                 <div className="info-item">
                                     <label>Email</label>
-                                    <p>{userProfile.email}</p>
+                                    <input type="email" value={userProfile.email} readOnly />
                                 </div>
                             </>
                         ) : (
@@ -140,7 +178,7 @@ export default function Settings({
                                     <input
                                         type="email"
                                         value={tempProfile.email}
-                                        onChange={(e) => handleProfileChange("email", e.target.value)}
+                                        disabled
                                     />
                                 </div>
                                 <div className="form-actions">

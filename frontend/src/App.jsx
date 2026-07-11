@@ -25,10 +25,21 @@ const mockData = {
 
 import "./App.css";
 
+const API_BASE = "http://localhost:4040";
+
 function App() {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [userSignedOut, setUserSignedOut] = useState(() => localStorage.getItem("userSignedOut") === "true");
+    const [authUser, setAuthUser] = useState(() => {
+        if (localStorage.getItem("userSignedOut") === "true") return null;
+        const stored = localStorage.getItem("authUser");
+        return stored ? JSON.parse(stored) : null;
+    });
+    const [authToken, setAuthToken] = useState(() => {
+        return localStorage.getItem("userSignedOut") === "true" ? null : localStorage.getItem("authToken") || null;
+    });
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -61,6 +72,150 @@ function App() {
         reports: "Relatórios",
         settings: "Configurações",
     };
+
+    const isAuthenticated = Boolean(authUser && authToken);
+
+    const fetchJson = async (path, options = {}) => {
+        const response = await fetch(`${API_BASE}${path}`, {
+            headers: {
+                "Content-Type": "application/json",
+                ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+                ...options.headers,
+            },
+            ...options,
+        });
+
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(body.error || body.message || response.statusText);
+        }
+        return body;
+    };
+
+    const handleLogin = async ({ email, password }) => {
+        try {
+            const body = await fetchJson("/login", {
+                method: "POST",
+                body: JSON.stringify({ email, password }),
+            });
+            setUserSignedOut(false);
+            setAuthToken(body.token);
+            setAuthUser(body.user);
+            setUserProfile(body.user);
+            setItems(body.transactions || []);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
+
+    const handleSignup = async ({ firstName, lastName, email, password }) => {
+        try {
+            const body = await fetchJson("/register", {
+                method: "POST",
+                body: JSON.stringify({ firstName, lastName, email, password }),
+            });
+            setUserSignedOut(false);
+            setAuthToken(body.token);
+            setAuthUser(body.user);
+            setUserProfile(body.user);
+            setItems(body.transactions || []);
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
+
+    const handleUpdateProfile = async (profileUpdates) => {
+        try {
+            const body = await fetchJson("/profile", {
+                method: "PATCH",
+                body: JSON.stringify(profileUpdates),
+            });
+            setAuthUser(body);
+            setUserProfile(body);
+            return { success: true, user: body };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
+
+    const handleChangePassword = async ({ currentPassword, newPassword }) => {
+        try {
+            await fetchJson("/profile/password", {
+                method: "PATCH",
+                body: JSON.stringify({ currentPassword, newPassword }),
+            });
+            return { success: true };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
+
+    const handleLogout = () => {
+        setAuthToken(null);
+        setAuthUser(null);
+        setUserSignedOut(true);
+        setTheme("light");
+        setUserProfile(mockData.userProfile);
+        setItems(mockData.items);
+        setMenuOpen(false);
+        navigate("/");
+    };
+
+    useEffect(() => {
+        if (authToken) {
+            localStorage.setItem("authToken", authToken);
+        } else {
+            localStorage.removeItem("authToken");
+        }
+    }, [authToken]);
+
+    useEffect(() => {
+        if (authUser) {
+            localStorage.setItem("authUser", JSON.stringify(authUser));
+        } else {
+            localStorage.removeItem("authUser");
+        }
+    }, [authUser]);
+
+    useEffect(() => {
+        if (userSignedOut) {
+            localStorage.setItem("userSignedOut", "true");
+        } else {
+            localStorage.removeItem("userSignedOut");
+        }
+    }, [userSignedOut]);
+
+    useEffect(() => {
+        if (!authToken) {
+            setLoading(false);
+            return;
+        }
+
+        const loadUserData = async () => {
+            try {
+                const profile = await fetchJson("/profile");
+                const transactions = await fetchJson("/transactions");
+                setAuthUser(profile);
+                setUserProfile(profile);
+                setItems(transactions);
+            } catch (error) {
+                console.error("Failed to load auth data", error);
+                handleLogout();
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadUserData();
+    }, [authToken]);
+
+    useEffect(() => {
+        if (!loading && isAuthenticated && ["/", "/signup"].includes(location.pathname)) {
+            navigate("/dashboard");
+        }
+    }, [loading, isAuthenticated, location.pathname, navigate]);
 
     // Persist notifications to localStorage
     useEffect(() => {
@@ -125,30 +280,44 @@ function App() {
     };
 
     // Transaction management functions
-    const addItem = (tx) => {
+    const addItem = async (tx) => {
+        const body = await fetchJson("/transactions", {
+            method: "POST",
+            body: JSON.stringify(tx),
+        });
+
         const normalized = {
-            ...tx,
-            id: items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1,
-            type: tx.type,
-            category: tx.category,
-            amount: formatTransactionAmount(tx),
-            date: tx.date,
-            isPaid: tx.category === "Contas" ? false : null,
+            ...body,
+            amount: formatTransactionAmount(body),
         };
+
         setItems(prev => [normalized, ...prev]);
         return normalized;
     };
 
-    const updateItem = (id, updates) => {
+    const updateItem = async (id, updates) => {
+        const body = await fetchJson(`/transactions/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(updates),
+        });
+
         setItems(prev =>
             prev.map(item =>
-                item.id === id ? { ...item, ...updates, amount: formatTransactionAmount({...item, ...updates}) } : item
+                item.id === id
+                    ? { ...body, amount: formatTransactionAmount(body) }
+                    : item
             )
         );
+        return body;
     };
 
-    const deleteItem = (id) => {
+    const deleteItem = async (id) => {
+        await fetchJson(`/transactions/${id}`, {
+            method: "DELETE",
+        });
+
         setItems(prev => prev.filter(item => item.id !== id));
+        return id;
     };
 
     // Notification functions
@@ -265,61 +434,64 @@ function App() {
     return (
 
         <div className="screens">
+            {isAuthenticated && (
+                <LeftNav
+                    menuOpen={menuOpen}
+                    setMenuOpen={setMenuOpen}
+                    onNavigate={switchPage}
+                    onLogout={handleLogout}
+                    userProfile={userProfile}
+                />
+            )}
 
-                    <LeftNav
-                        menuOpen={menuOpen}
-                        setMenuOpen={setMenuOpen}
-                        onNavigate={switchPage}
-                        userProfile={userProfile}
-                    />
+            <main className={`dashboard-area${isAuthenticated ? "" : " no-sidebar"}`}>
+                {isAuthenticated && (
+                    <div className="desktop-notif">
+                        <button
+                            className="notification-bell desktop"
+                            onClick={() => switchPage("settings")}
+                            title="Notificações"
+                        >
+                            <Bell />
+                            {notifications.filter(n => !n.read).length > 0 && (
+                                <span className="badge">{notifications.filter(n => !n.read).length}</span>
+                            )}
+                        </button>
+                    </div>
+                )}
 
-            <main className="dashboard-area">
+                {isAuthenticated && (
+                    <header className="mobile-header">
+                        {(() => {
+                            const first = (userProfile.firstName || "").trim();
+                            const lastFirst = getFirstLastName(userProfile.lastName || "");
+                            const initials = `${(first.charAt(0)||"").toUpperCase()}${(lastFirst.charAt(0)||"").toUpperCase()}`;
+                            const bg = getAvatarColor(first);
+                            return (
+                                <button
+                                    className="mobile-avatar"
+                                    onClick={() => setMenuOpen(true)}
+                                    style={{ background: bg, color: '#1e293b', fontWeight: 700 }}
+                                >
+                                    {initials}
+                                </button>
+                            );
+                        })()}
 
-                <div className="desktop-notif">
-                    <button
-                        className="notification-bell desktop"
-                        onClick={() => switchPage("settings")}
-                        title="Notificações"
-                    >
-                        <Bell />
-                        {notifications.filter(n => !n.read).length > 0 && (
-                            <span className="badge">{notifications.filter(n => !n.read).length}</span>
-                        )}
-                    </button>
-                </div>
+                        <span>{pageHeader}</span>
 
-                <header className="mobile-header">
-
-                    {(() => {
-                        const first = (userProfile.firstName || "").trim();
-                        const lastFirst = getFirstLastName(userProfile.lastName || "");
-                        const initials = `${(first.charAt(0)||"").toUpperCase()}${(lastFirst.charAt(0)||"").toUpperCase()}`;
-                        const bg = getAvatarColor(first);
-                        return (
-                            <button
-                                className="mobile-avatar"
-                                onClick={() => setMenuOpen(true)}
-                                style={{ background: bg, color: "var(--text-primary)", fontWeight: 700 }}
-                            >
-                                {initials}
-                            </button>
-                        );
-                    })()}
-
-                    <span>{pageHeader}</span>
-
-                    <button 
-                        className="notification-bell"
-                        onClick={() => switchPage("settings")}
-                        title="Notificações"
-                    >
-                        <Bell />
-                        {notifications.filter(n => !n.read).length > 0 && (
-                            <span className="badge">{notifications.filter(n => !n.read).length}</span>
-                        )}
-                    </button>
-
-                </header>
+                        <button
+                            className="notification-bell"
+                            onClick={() => switchPage("settings")}
+                            title="Notificações"
+                        >
+                            <Bell />
+                            {notifications.filter(n => !n.read).length > 0 && (
+                                <span className="badge">{notifications.filter(n => !n.read).length}</span>
+                            )}
+                        </button>
+                    </header>
+                )}
 
                 {loading ? <Skeleton /> : (
                     <Router
@@ -338,6 +510,12 @@ function App() {
                         theme={theme}
                         setTheme={setTheme}
                         onNavigate={switchPage}
+                        isAuthenticated={isAuthenticated}
+                        onLogin={handleLogin}
+                        onSignup={handleSignup}
+                        onLogout={handleLogout}
+                        onUpdateProfile={handleUpdateProfile}
+                        onChangePassword={handleChangePassword}
                     />
                 )}
 

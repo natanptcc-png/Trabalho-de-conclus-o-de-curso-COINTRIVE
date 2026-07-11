@@ -1,0 +1,43 @@
+  TESTES EFETUADOS NO PROJETO CONTRIVE
+>> Foi efetuado testes de cadastro com dois usuários para saber se a criação de usuários está ocorrendo corretamente tanto no Front-End tanto no Back-End, se está salvando corretamente no banco de dados com a senha criptografada e com os dados padrões
+>> Até o presente momento os usuários foram criados corretamente, e as suas informações estão sendo corretamente atualizadas ou alteradas pela API quando o usuário efetua alguma mudança pelas configurações
+>> Foi testado a criação de transações para ver se estão sendo criadas corretamente, e estão sendo criadas como intencionadas, porém, não estão sendo salvas no banco de dados como deveria.
+>> As transações agora estão sendo atualizadas corretamente no banco quando efetuado alguma deleção e/ou edição em uma transação.
+
+PROMPTS USADO
+Prompt 1
+
+Content: based on my current code, make a mysql2-based code in backend, following the same structure and commenting structure as I did, but more complete and accurate to the current website state, then later tell me what tables should I make in mysql server. you can refactor the current code that has been made, then apply the correct fetches to the frontend
+Length: 351 chars
+Prompt 2
+
+Content: add to the Create Account for user to put their first name and last name, for selecting the username, in case the user has two first names, only take the first name so it doesnt conflict with the first last name. fix the navbar and bell appearing on the login/create account screen add a about the business on the left side of the create/login account frame
+Length: 360 chars
+Prompt 3
+
+Content: make the Create Account and Login Account more smaller in desktop, and make a small summary of what Cointrive is but put a template paragraph because Ill put later
+Length: 163 chars
+Prompt 4
+
+Content: Uncaught ReferenceError: first is not defined LeftNav index.jsx:31 React 10 performWorkUntilDeadline scheduler.development.js:45
+
+Prompt 5:
+Now make the following:
+
+For Dashboard
+Make the "Distribuição de Gastos" based on a type of expense from each category that has a expense based on the current month's expenses.
+Change completely "Gastos Recentes" to look smaller and more appealing for both desktop and mobile, also make it take the current month's expenses and a "View All" button which will take you to transactions.
+The last two cards replace completely with "Top Gastos do Mês" with the 3 categories with most expenses.
+
+Make the nofication bell also visible on desktop with a bell icon from lucide-react which is already installed.
+
+On Relatórios
+Remove the background from both Renda Total and Gastos Totais.
+
+For user profile (icon and username)
+Make the NOME and SOBRENOME from the settings also update the username from the navigation, but for the last name in the username ONLY take the "first" last name, so if user has three last names, make it take only the first one.
+The icon make it dynamically take the first character of the first name and the first character of the last name that was chosen to show, and based on the first character of the first name make it choose a color, so if the first character of the first name is "P" for example, it chooses a blue color for the circle, but make the colors list less saturated so the text is viisble.
+To give more context of the dynamic icon, if the user's first name is Daniel and last name (sobrenome) is Silva Santos, it'll take only the Silva from last name since it is the first one, so on the username will show Daniel SIlva, so it'll take the first characters from the first name and the last name that was chosen to make the icon, so the icon will look like "DS", and since the first name's first character is D, it'll look for the letter D in the alphabetical colors list and will choose the color from the letter D, so if the color on the letter D is a redish less saturated color, it'll always choose that color for the circle in desktop and mobile in case the first name's first character is D, the same idea for the rest of the 25 letters in the alphabet.
+
+Prompt 6:
+fix the "Selecionar" to be a calendar icon which you can pick the date just like before, add auto-formatting to dates and cleanup modal content after creating transaction or cancelling transaction, also add a confirm modal when creating where if you confirm itll create, cancelling the confirmation modal itll return you to the create transaciton modal
