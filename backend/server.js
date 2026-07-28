@@ -51,7 +51,7 @@ function authenticateToken(req, res, next) {
 
 async function findUserByEmail(email) {
     const [rows] = await db.query(
-        `SELECT id, first_name, last_name, email, password, phone, bio, currency, role
+        `SELECT id, first_name, last_name, email, password, currency, role
          FROM bd_users
          WHERE email = ?`,
         [String(email || '').trim().toLowerCase()]
@@ -61,7 +61,7 @@ async function findUserByEmail(email) {
 
 async function findUserById(id) {
     const [rows] = await db.query(
-        `SELECT id, first_name, last_name, email, phone, bio, currency, role
+        `SELECT id, first_name, last_name, email, currency, role
          FROM bd_users
          WHERE id = ?`,
         [id]
@@ -71,7 +71,7 @@ async function findUserById(id) {
 
 async function findUserByIdWithPassword(id) {
     const [rows] = await db.query(
-        `SELECT id, first_name, last_name, email, password, phone, bio, currency, role
+        `SELECT id, first_name, last_name, email, password, currency, role
          FROM bd_users
          WHERE id = ?`,
         [id]
@@ -86,8 +86,6 @@ function mapUserProfile(row) {
         firstName: row.first_name,
         lastName: row.last_name,
         email: row.email,
-        phone: row.phone || '',
-        bio: row.bio || '',
         currency: row.currency || 'BRL',
         role: row.role || 'user',
     };
@@ -166,15 +164,13 @@ API.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const [insertResult] = await db.query(
             `INSERT INTO bd_users
-             (first_name, last_name, email, password, phone, bio, currency, role)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+             (first_name, last_name, email, password, currency, role)
+             VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 String(firstName || 'Novo').trim(),
                 String(lastName || 'Usuário').trim(),
                 normalizedEmail,
                 hashedPassword,
-                '',
-                '',
                 'BRL',
                 'user',
             ]
@@ -213,7 +209,7 @@ API.get('/profile', authenticateToken, async (req, res) => {
 
 API.patch('/profile', authenticateToken, async (req, res) => {
     try {
-        const { firstName, lastName, phone, bio, currency, currentPassword, newPassword } = req.body;
+        const { firstName, lastName, currency, currentPassword, newPassword } = req.body;
         const updates = [];
         const values = [];
 
@@ -224,14 +220,6 @@ API.patch('/profile', authenticateToken, async (req, res) => {
         if (lastName !== undefined) {
             updates.push('last_name = ?');
             values.push(String(lastName || '').trim());
-        }
-        if (phone !== undefined) {
-            updates.push('phone = ?');
-            values.push(String(phone || '').trim());
-        }
-        if (bio !== undefined) {
-            updates.push('bio = ?');
-            values.push(String(bio || '').trim());
         }
         if (currency !== undefined) {
             updates.push('currency = ?');
@@ -431,7 +419,7 @@ API.delete('/transactions/:id', authenticateToken, async (req, res) => {
 API.get('/users', authenticateToken, async (req, res) => {
     try {
         const [users] = await db.query(
-            `SELECT id, first_name AS firstName, last_name AS lastName, email, phone, bio, currency, role
+            `SELECT id, first_name AS firstName, last_name AS lastName, email, currency, role
              FROM bd_users`
         );
         return res.status(200).json(users);
