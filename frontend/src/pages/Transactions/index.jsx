@@ -6,6 +6,8 @@ import CategorySelect from "../../components/Transactions/CategorySelect";
 import { useState, useMemo, useEffect } from "react";
 import * as XLSX from "xlsx/dist/xlsx.full.min.js";
 import { showToast } from "../../utils/toast";
+import { BadgeDollarSign, Info, SquarePen, Trash2 } from "lucide-react";
+
 
 export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
 
@@ -19,6 +21,9 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
     const [page, setPage] = useState(1);
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
     const [deleteConfirmDescription, setDeleteConfirmDescription] = useState("");
+
+    const [actionsInfoOpen, setActionsInfoOpen] = useState(false);
+    const [actionsInfoClosing, setActionsInfoClosing] = useState(false);
 
     useEffect(() => {
         if (deleteConfirmId) {
@@ -105,6 +110,15 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
         showToast({ type: "success", title: "Exportação concluída", message: `${rows.length} transações foram exportadas.` });
     };
 
+    const closeActionsInfo = () => {
+        setActionsInfoClosing(true);
+    
+        setTimeout(() => {
+            setActionsInfoClosing(false);
+            setActionsInfoOpen(false);
+        }, 250); // match the CSS animation duration
+    };
+
     // filtering logic
     const filtered = useMemo(() => {
         const now = new Date();
@@ -139,6 +153,17 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
     const pageSize = 10;
     const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
     const pageItems = filtered.slice((page-1)*pageSize, page*pageSize);
+
+    const onPaidChange = (itemId) => {
+        const item = items.find(i => i.id === itemId);
+        if (item) {
+            onUpdate(itemId, { isPaid: !item.isPaid });
+            showToast({
+                type: "success", 
+                message: item.isPaid ? `${item.description} marcada como não paga.` : `${item.description} marcada como paga.` 
+            });
+        }
+    };
 
     return (
         <div className="transactions-container">
@@ -197,7 +222,27 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
                             <th>TIPO</th>
                             <th>VALOR</th>
                             <th>MÉTODO DE PAGAMENTO</th>
-                            <th>AÇÕES</th>
+                            <th>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: "6px"
+                                    }}
+                                >
+                                    <span>AÇÕES</span>
+
+                                    <button
+                                        type="button"
+                                        className="actions-info-btn"
+                                        onClick={() => setActionsInfoOpen(true)}
+                                        title="O que faz cada botão?"
+                                    >
+                                        <Info className="licon" />
+                                    </button>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -207,6 +252,8 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
                                 {...tx} 
                                 onEdit={() => { setEditingId(tx.id); setModalOpen(true); }}
                                 onDelete={() => handleDeleteItem(tx.id, tx.description)}
+                                onPaidChange={() => onPaidChange(tx.id)}
+                                onActionsView={() => setActionsInfoOpen(true)}
                             />
                             
                         ))}
@@ -243,6 +290,64 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
                 editingItem={editingId ? items.find(i => i.id === editingId) : null}
                 onUpdate={handleEditItem}
             />
+
+            {actionsInfoOpen && (
+                        <div
+                            className={`modal-overlay ${
+                                actionsInfoClosing ? "closing" : "open"
+                            }`}
+                            onClick={closeActionsInfo}
+                        >
+                        <div
+                            className={`modal ${
+                                actionsInfoClosing ? "closing" : "open"
+                            }`}
+                            onClick={(e) => e.stopPropagation()}
+                        >        
+                
+                        <h3>Ações das Transações</h3>
+
+                        <p>
+                            Cada transação possui alguns botões de ação. Veja o que cada um faz:
+                        </p>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "16px",
+                                marginTop: "20px"
+                            }}
+                        >
+                            <div>
+                                <strong><SquarePen className="info-licon" /> Editar</strong>
+                                <p>Abre a janela de edição para alterar qualquer informação da transação.</p>
+                            </div>
+
+                            <div>
+                                <strong><Trash2 className="info-licon" /> Excluir</strong>
+                                <p>Remove permanentemente a transação após uma confirmação.</p>
+                            </div>
+
+                            <div>
+                                <strong><BadgeDollarSign className="info-licon" /> Pago / Não Pago</strong>
+                                <p>
+                                    Marca a transação como paga ou não paga, atualizando seu status.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button
+                                className="btn primary"
+                                onClick={closeActionsInfo}
+                            >
+                                Entendi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {deleteConfirmId && (
                 <div className="modal-overlay open" style={{ zIndex: 2400 }}>

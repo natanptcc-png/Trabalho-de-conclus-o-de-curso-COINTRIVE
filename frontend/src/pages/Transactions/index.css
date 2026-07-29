@@ -315,6 +315,7 @@
 
 .transaction-actions {
     display: flex;
+    justify-content: center;
     gap: 6px;
 }
 
@@ -347,6 +348,45 @@
     border-color: #ef4444;
 }
 
+.action-btn.paid {
+    color: white;
+    background: rgba(59, 172, 83, 0.427);
+    border-color: #61ef44;
+}
+.action-btn.notpaid {
+    color: rgb(15, 169, 15);
+}
+
+.action-btn.notpaid:hover {
+    background: rgba(68, 239, 105, 0.1);
+    border-color: #61ef44;
+}
+
+.actions-info-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.actions-info-btn:hover {
+    background-color: rgba(142, 142, 142, 0.188);
+    border-color: rgb(194, 194, 194);
+}
+
+.info-licon {
+    transform: scale(.75) translateY(8px);
+}
+
+.aib-mob {
+    display: none !important;
+    transform: translateX(-50px) scale(0.85);
+}
+
 /* hide header action buttons on small screens (we use FAB instead) */
 @media (max-width: 768px) {
     .transactions-header .actions .btn.export,
@@ -361,5 +401,9 @@
     .action-btn {
         padding: 3px 6px;
         font-size: 0.8rem;
+    }
+
+    .aib-mob {
+        display: block !important;
     }
 }

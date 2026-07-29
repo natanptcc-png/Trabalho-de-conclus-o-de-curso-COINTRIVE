@@ -1,4 +1,7 @@
-export default function TransactionMemo({ id, date, description, category, type, amount, payment, isPaid, onEdit, onDelete }) {
+import { Trash2, SquarePen, BadgeDollarSign, Info } from "lucide-react"
+import "./TM_styles.css"
+
+export default function TransactionMemo({ id, date, description, category, type, amount, payment, isPaid, onEdit, onDelete, onPaidChange, onActionsView }) {
 
     const tagClass = type === "Renda" ? "tag income" : "tag expense";
 
@@ -43,10 +46,18 @@ export default function TransactionMemo({ id, date, description, category, type,
             </td>
             <td>
                 <div className="mobile-label">AÇÕES</div>
+                <button
+                    type="button"
+                    className="actions-info-btn aib-mob"
+                    onClick={onActionsView}
+                    title="O que faz cada botão?"
+                >
+                    <Info className="licon" />
+                </button>
                 <div className="transaction-actions">
-                    <button className="action-btn edit" onClick={onEdit} title="Editar">✎</button>
-                    <button className="action-btn delete" onClick={onDelete} title="Deletar">✕</button>
-                    {category == "Contas" && <button className="action-btn" inactive title={isPaid ? "Pago" : "Não Pago"}>{isPaid ? "✓" : "✕"}</button>}
+                    <button className="action-btn edit" onClick={onEdit} title="Editar"><SquarePen className="licon" /></button>
+                    <button className="action-btn delete" onClick={onDelete} title="Deletar"><Trash2 className="licon" /></button>
+                    { type === "Gastos" && <button className={`action-btn ${isPaid ? "paid" : "notpaid"}`} onClick={onPaidChange} title={isPaid ? "Pago" : "Não Pago"}><BadgeDollarSign className="licon" /></button>}
                 </div>
             </td>
         </tr>
