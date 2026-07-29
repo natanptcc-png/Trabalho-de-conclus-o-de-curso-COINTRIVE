@@ -86,6 +86,7 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
             Tipo: tx.type,
             Valor: tx.amount,
             Método: tx.payment,
+            Pago: tx.isPaid
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(rows);
@@ -201,15 +202,26 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
                     </thead>
                     <tbody>
                         {pageItems.map(tx => (
-                            <TransactionMemo 
+                             <TransactionMemo 
                                 key={tx.id} 
                                 {...tx} 
                                 onEdit={() => { setEditingId(tx.id); setModalOpen(true); }}
                                 onDelete={() => handleDeleteItem(tx.id, tx.description)}
                             />
+                            
                         ))}
+                        
                     </tbody>
+                    
                 </table>
+
+                {
+                    pageItems.length <= 0 &&
+
+                    <div className="table-footer">
+                        <p style={{textAlign: "center", width: "100%"}}>Nenhuma transação ativa, que tal criar uma em <b>"Nova Transação"</b>?</p>
+                    </div>
+                }
 
                 <div className="table-footer">Mostrando {filtered.length} transações</div>
 

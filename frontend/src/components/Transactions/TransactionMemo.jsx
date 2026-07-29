@@ -1,4 +1,4 @@
-export default function TransactionMemo({ id, date, description, category, type, amount, payment, onEdit, onDelete }) {
+export default function TransactionMemo({ id, date, description, category, type, amount, payment, isPaid, onEdit, onDelete }) {
 
     const tagClass = type === "Renda" ? "tag income" : "tag expense";
 
@@ -35,7 +35,7 @@ export default function TransactionMemo({ id, date, description, category, type,
             </td>
             <td>
                 <div className="mobile-label">VALOR</div>
-                {amount}
+                {type === "Renda" ? "+" : "-"} R$ {amount}
             </td>
             <td>
                 <div className="mobile-label">MÉTODO</div>
@@ -46,6 +46,7 @@ export default function TransactionMemo({ id, date, description, category, type,
                 <div className="transaction-actions">
                     <button className="action-btn edit" onClick={onEdit} title="Editar">✎</button>
                     <button className="action-btn delete" onClick={onDelete} title="Deletar">✕</button>
+                    {category == "Contas" && <button className="action-btn" inactive title={isPaid ? "Pago" : "Não Pago"}>{isPaid ? "✓" : "✕"}</button>}
                 </div>
             </td>
         </tr>

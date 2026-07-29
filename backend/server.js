@@ -328,7 +328,7 @@ API.post('/transactions', authenticateToken, async (req, res) => {
                 String(description || 'Nova transação').trim(),
                 String(category || 'Outros').trim(),
                 String(type || 'Gastos').trim(),
-                String(amount || '- R$ 0,00').trim(),
+                String(amount || '0,00').trim(),
                 String(payment || 'Outro').trim(),
                 isPaid === null ? null : Boolean(isPaid),
             ]
@@ -347,48 +347,104 @@ API.post('/transactions', authenticateToken, async (req, res) => {
     }
 });
 
-API.put('/transactions/:id', authenticateToken, async (req, res) => {
+API.patch("/transactions/:id", authenticateToken, async (req, res) => {
     try {
         const txId = Number(req.params.id);
-        const { date, description, category, type, amount, payment, isPaid } = req.body;
-        const normalizedDate = (() => {
-            const raw = String(date || '');
-            const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
-            return match ? match[1] : raw.slice(0, 10);
-        })();
 
         const [existing] = await db.query(
-            `SELECT id FROM bd_transactions WHERE id = ? AND userId = ?`,
+            `SELECT id
+             FROM bd_transactions
+             WHERE id = ? AND userId = ?`,
             [txId, req.user.id]
         );
+
         if (existing.length === 0) {
-            return res.status(404).json({ error: 'Transaction not found.' });
+            return res.status(404).json({
+                error: "Transaction not found."
+            });
         }
+
+        const updates = [];
+        const values = [];
+
+        if (req.body.date !== undefined) {
+            const raw = String(req.body.date || "");
+            const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+            const normalizedDate = match ? match[1] : raw.slice(0, 10);
+
+            updates.push("date = ?");
+            values.push(normalizedDate);
+        }
+
+        if (req.body.description !== undefined) {
+            updates.push("description = ?");
+            values.push(String(req.body.description).trim());
+        }
+
+        if (req.body.category !== undefined) {
+            updates.push("category = ?");
+            values.push(String(req.body.category).trim());
+        }
+
+        if (req.body.type !== undefined) {
+            updates.push("type = ?");
+            values.push(String(req.body.type).trim());
+        }
+
+        if (req.body.amount !== undefined) {
+            updates.push("amount = ?");
+            values.push(String(req.body.amount).trim());
+        }
+
+        if (req.body.payment !== undefined) {
+            updates.push("payment = ?");
+            values.push(String(req.body.payment).trim());
+        }
+
+        if (req.body.isPaid !== undefined) {
+            updates.push("isPaid = ?");
+            values.push(Boolean(req.body.isPaid));
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({
+                error: "No fields provided to update."
+            });
+        }
+
+        values.push(txId);
 
         await db.query(
             `UPDATE bd_transactions
-             SET date = ?, description = ?, category = ?, type = ?, amount = ?, payment = ?, isPaid = ?
+             SET ${updates.join(", ")}
              WHERE id = ?`,
-            [
-                normalizedDate,
-                String(description || '').trim(),
-                String(category || '').trim(),
-                String(type || '').trim(),
-                String(amount || '').trim(),
-                String(payment || '').trim(),
-                isPaid === null ? null : Boolean(isPaid),
-                txId,
-            ]
+            values
         );
 
         const [rows] = await db.query(
-            `SELECT id, userId, DATE_FORMAT(date, '%Y-%m-%d') AS date, description, category, type, amount, payment, isPaid
-             FROM bd_transactions WHERE id = ?`,
+            `SELECT id,
+                    userId,
+                    DATE_FORMAT(date, '%Y-%m-%d') AS date,
+                    description,
+                    category,
+                    type,
+                    amount,
+                    payment,
+                    isPaid
+             FROM bd_transactions
+             WHERE id = ?`,
             [txId]
         );
+
         return res.status(200).json(rows[0]);
+
     } catch (err) {
-        return res.status(500).json({ error: 'Unable to update transaction.', details: err.message });
+        console.error(err);
+
+        return res.status(500).json({
+            error: "Unable to update transaction.",
+            details: err.message
+        });
     }
 });
 
@@ -441,6 +497,8 @@ API.get('/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
+const public_ip = process.env.MACHINE_IP
+
 API.listen(PORT, () => {
-    console.log(`Logged in to host http://localhost:${PORT}`);
+    console.log(`Logged in to host http://localhost:${PORT} or on http://${public_ip}:${PORT}`);
 });

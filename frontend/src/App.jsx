@@ -25,7 +25,7 @@ const mockData = {
 
 import "./App.css";
 
-const API_BASE = "http://localhost:4040";
+const API_BASE = "http://localhost:4040"; 
 
 function App() {
 
@@ -64,6 +64,11 @@ function App() {
             excessExpenses: true,
             contasAlerts: true,
         };
+    });
+
+    const [generatedNotifications, setGeneratedNotifications] = useState(() => {
+        const stored = localStorage.getItem("generatedNotifications");
+        return stored ? JSON.parse(stored) : [];
     });
 
     const pageHeaders = {
@@ -227,6 +232,14 @@ function App() {
         localStorage.setItem("notificationSettings", JSON.stringify(notificationSettings));
     }, [notificationSettings]);
 
+    // Solution for persiting notifications
+    useEffect(() => {
+        localStorage.setItem(
+            "generatedNotifications",
+            JSON.stringify(generatedNotifications)
+        );
+    }, [generatedNotifications]);
+
     // initial skeleton on first load
     useEffect(() => {
         const t = setTimeout(() => setLoading(false), 700);
@@ -275,8 +288,8 @@ function App() {
         return normalizedAmount.startsWith("+") || normalizedAmount.startsWith("-")
             ? `${normalizedAmount.startsWith("+") ? "+ R$" : "- R$"} ${normalizedAmount.replace(/^[-+]/, "").trim()}`
             : tx.type === "Renda"
-                ? `+ R$ ${normalizedAmount}`
-                : `- R$ ${normalizedAmount}`;
+                ? `${normalizedAmount}`
+                : `${normalizedAmount}`;
     };
 
     // Transaction management functions
@@ -296,8 +309,12 @@ function App() {
     };
 
     const updateItem = async (id, updates) => {
+        console.log("Updating transaction:", id);
+        console.log("Payload:", updates);
+    
+
         const body = await fetchJson(`/transactions/${id}`, {
-            method: "PUT",
+            method: "PATCH",
             body: JSON.stringify(updates),
         });
 
@@ -349,61 +366,92 @@ function App() {
     // Check for notifications that should be triggered
     useEffect(() => {
         const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-
-        // Check for excess expenses
+    
+        const startOfMonth = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+        );
+    
+        const endOfMonth = new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0,
+            23,
+            59,
+            59,
+            999
+        );
+    
         if (notificationSettings.excessExpenses) {
+    
             let monthlyExpenses = 0;
+    
             items.forEach(item => {
                 const txDate = new Date(item.date);
-                if (item.type === "Gastos" && txDate >= startOfMonth && txDate <= endOfMonth) {
-                    monthlyExpenses += Math.abs(parseFloat(item.amount.replace(/[^\d.-]/g, "")));
+    
+                if (
+                    item.type === "Gastos" &&
+                    txDate >= startOfMonth &&
+                    txDate <= endOfMonth
+                ) {
+                    monthlyExpenses += Math.abs(
+                        parseFloat(item.amount.replace(/[^\d.-]/g, ""))
+                    );
                 }
             });
-
-            // If expenses exceed 5000, create notification (only if not already notified this month)
-            if (monthlyExpenses > 5000) {
-                const existingNotif = notifications.find(n =>
-                    n.type === "excessExpenses" && 
-                    new Date(n.timestamp).getMonth() === now.getMonth()
-                );
-                if (!existingNotif) {
-                    addNotification({
-                        type: "excessExpenses",
-                        title: "⚠️ Alerta de Gastos",
-                        message: `Seus gastos este mês (R$ ${monthlyExpenses.toFixed(2)}) ultrapassaram R$ 5.000.`,
-                    });
-                }
+    
+            const key = `expenses-${now.getFullYear()}-${now.getMonth()}`;
+    
+            if (
+                monthlyExpenses > 5000 &&
+                !generatedNotifications.includes(key)
+            ) {
+    
+                addNotification({
+                    type: "excessExpenses",
+                    title: "⚠️ Alerta de Gastos",
+                    message: `Seus gastos este mês (R$ ${monthlyExpenses.toFixed(2)}) ultrapassaram R$ 5.000.`,
+                });
+    
+                setGeneratedNotifications(prev => [...prev, key]);
             }
         }
-
-        // Check for Contas upcoming
+    
         if (notificationSettings.contasAlerts) {
-            const daysFromNow = 3; // Alert if within 3 days
+    
             const alertDate = new Date(now);
-            alertDate.setDate(alertDate.getDate() + daysFromNow);
-
+            alertDate.setDate(alertDate.getDate() + 3);
+    
             items.forEach(item => {
-                if (item.category === "Contas" && !item.isPaid) {
-                    const txDate = new Date(item.date);
-                    if (txDate <= alertDate && txDate >= now) {
-                        const existingNotif = notifications.find(n =>
-                            n.type === "contasAlert" && n.itemId === item.id
-                        );
-                        if (!existingNotif) {
-                            addNotification({
-                                type: "contasAlert",
-                                itemId: item.id,
-                                title: "📅 Conta Próxima do Vencimento",
-                                message: `${item.description} vence em ${txDate.toLocaleDateString("pt-BR")}.`,
-                            });
-                        }
-                    }
-                }
+    
+                if (item.category !== "Contas") return;
+                if (item.isPaid) return;
+    
+                const txDate = new Date(item.date);
+    
+                if (txDate < now || txDate > alertDate) return;
+    
+                const key = `bill-${item.id}`;
+    
+                if (generatedNotifications.includes(key)) return;
+    
+                addNotification({
+                    type: "contasAlert",
+                    itemId: item.id,
+                    title: "📅 Conta Próxima do Vencimento",
+                    message: `${item.description} vence em ${txDate.toLocaleDateString("pt-BR")}.`,
+                });
+    
+                setGeneratedNotifications(prev => [...prev, key]);
             });
         }
-    }, [items, notificationSettings]);
+    
+    }, [
+        items,
+        notificationSettings,
+        generatedNotifications
+    ]);
 
     const getAvatarColor = (firstName) => {
         if (!firstName) return "hsl(220,30%,80%)";

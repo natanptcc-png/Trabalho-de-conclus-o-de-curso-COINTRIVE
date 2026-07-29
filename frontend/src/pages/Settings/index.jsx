@@ -107,7 +107,7 @@ export default function Settings({
         const item = items.find(i => i.id === itemId);
         if (item) {
             onUpdate(itemId, { isPaid: !item.isPaid });
-            showToast({ 
+            showToast({
                 type: "success", 
                 message: item.isPaid ? `${item.description} marcada como não paga.` : `${item.description} marcada como paga.` 
             });
@@ -303,7 +303,7 @@ export default function Settings({
                 {/* Contas Management Section */}
                 {contasItems.length > 0 && (
                     <section className="settings-section">
-                        <h2>📅 Contas para Pagar</h2>
+                        <h2>Contas para Pagar</h2>
                         <div className="contas-list">
                             {contasItems.map(item => (
                                 <div key={item.id} className={`conta-item ${item.isPaid ? "paid" : ""}`}>

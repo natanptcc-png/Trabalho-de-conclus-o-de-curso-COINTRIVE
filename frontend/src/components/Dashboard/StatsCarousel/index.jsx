@@ -23,7 +23,11 @@ export default function StatsCarousel({ items = [] }) {
             }
         });
 
-        const netSavings = totalIncome - totalExpenses;
+        let netSavings = totalIncome - totalExpenses;
+
+        if (netSavings < 0) {
+            netSavings = 0;
+        }
 
         return {
             income: totalIncome,
