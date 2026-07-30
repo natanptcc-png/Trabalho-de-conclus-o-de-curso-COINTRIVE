@@ -290,6 +290,39 @@ API.patch('/profile/password', authenticateToken, async (req, res) => {
     }
 });
 
+API.patch("/profile/force-reset/:id", authenticateToken, async(req,res) => {
+    try {
+        const { newPassword } = req.body;
+        const { id } = req.params.id;
+
+        if (!newPassword) {
+            return res.status(400).json({error: "Missing new password."})
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({error: "The new password must be 8 characters long minimum."})
+        }
+
+        const user = await findUserByIdWithPassword(req.user.id);
+        if (!user) {
+            return res.status(404).json({error: "User not found."})
+        }
+
+        const hashed = await bcrypt.hash(String(newPassword), 10);
+        await db.query(
+            `UPDATE bd_users
+            SET password = ?
+            WHERE id = ?`,
+            [hashed, id]
+        );
+
+        return res.status(200).json({success: true});
+
+    } catch(err) {
+        return res.status(500).json({error: "Unable to change password forcefully.", details: err.message});
+    }
+})
+
 ////////////////////////////////////////
 
 /////////////////////////// TRANSACTIONS
@@ -499,6 +532,6 @@ API.get('/users/:id', authenticateToken, async (req, res) => {
 
 const public_ip = process.env.MACHINE_IP
 
-API.listen(PORT, () => {
+API.listen(PORT, public_ip, () => {
     console.log(`Logged in to host http://localhost:${PORT} or on http://${public_ip}:${PORT}`);
 });

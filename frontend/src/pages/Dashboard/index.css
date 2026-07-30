@@ -10,6 +10,7 @@
     width: 100%;
     max-width: 1080px;
     margin: 0 auto;
+    transform: translateY(-50px);
     padding: 20px 22px;
 }
 
@@ -224,13 +225,13 @@
     }
 
     .pie-container {
-        height: 240px;
+        height: 300px;
         margin-top: 8px;
     }
         
     .pie-container canvas {
-        max-width: 190px;
-        max-height: 190px;
+        max-width: 280px;
+        max-height: 280px;
     }
 
     .carousel-card {

@@ -11,7 +11,7 @@ export default function Dashboard({ items, userProfile, onNavigate }) {
             <div className="welcome-container">
 
                 <h1>Dashboard</h1>
-                <p>👋 Bem vindo de volta {userProfile?.firstName}!</p>
+                <p>👋 Bem-vindo de volta {userProfile?.firstName}!</p>
 
             </div>
 

@@ -179,7 +179,7 @@ export default function PieChartCard({ items = [] }) {
     return (
         <div className="chart-wrapper">
 
-            <h2>Distribuição de Gastos</h2>
+            <h2 style={{textAlign: "center"}}>Distribuição de Gastos</h2>
 
             <div className="pie-container">
 

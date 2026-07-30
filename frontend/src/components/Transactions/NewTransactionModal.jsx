@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import categories from "../../data/categories";
+import selectCategory from "../../data/categories";
 
 export default function NewTransactionModal({ open, onClose, onAdd, editingItem, onUpdate }) {
 
     const [form, setForm] = useState({
         description: "",
         type: "Gastos",
-        category: "Comida",
+        category: "Alimentos",
         amount: "",
         payment: "Débito",
         date: "",
@@ -22,7 +22,7 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
         setForm({
             description: "",
             type: "Gastos",
-            category: "Comida",
+            category: "Alimentos",
             amount: "",
             payment: "Débito",
             date: "",
@@ -98,17 +98,38 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
 
     const formatAmountValue = (value) => {
         if (!value) return "";
-        const normalized = value.toString().replace(',', '.');
-        const match = normalized.match(/^(-?\d+)(?:\.(\d*))?$/);
+    
+        const normalized = value.toString().replace(",", ".");
+        const match = normalized.match(/^(\d+)(?:\.(\d*))?$/);
+    
         if (!match) return value;
-        const integerPart = match[1];
-        let decimalPart = match[2] ?? '';
-        if (decimalPart.length === 0) decimalPart = '00';
-        else if (decimalPart.length === 1) decimalPart = `${decimalPart}0`;
-        else decimalPart = decimalPart.slice(0, 2);
-        return `${integerPart}.${decimalPart}`;
+    
+        let integer = match[1].replace(/^0+/, "") || "0";
+        let decimal = match[2] ?? "";
+    
+        // User entered only whole numbers
+        if (!match[2]) {
+            if (integer.length === 11) {
+                decimal = integer.slice(-2);
+                integer = integer.slice(0, -2);
+            } else if (integer.length === 10) {
+                decimal = integer.slice(-1) + "0";
+                integer = integer.slice(0, -1);
+            } else {
+                decimal = "00";
+            }
+        }
+    
+        integer = String(parseInt(integer, 10) || 0);
+    
+        // Ensure exactly 2 decimal places
+        if (decimal.length === 0) decimal = "00";
+        else if (decimal.length === 1) decimal += "0";
+        else decimal = decimal.slice(0, 2);
+    
+        return `${integer}.${decimal}`;
     };
-
+    
     const submit = (e) => {
         e.preventDefault();
         const payload = {
@@ -157,8 +178,8 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
                 <h3>{modalTitle}</h3>
                 <form onSubmit={submit} className="modal-form">
                     <label>
-                        DESCRIÇÃO
-                        <input value={form.description} onChange={e => setForm({...form, description: e.target.value})} required />
+                        NOME
+                        <input value={form.description} onChange={e => setForm({...form, description: e.target.value})} maxLength={31} required />
                     </label>
 
                     <div className="row">
@@ -173,7 +194,7 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
                         <label>
                             CATEGORIA
                             <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
-                                {categories.filter(c=>c!=='Todas as Categorias').map(c => <option key={c}>{c}</option>)}
+                                {selectCategory(form.type).filter(c=>c!=='Todas as Categorias').map(c => <option key={c}>{c}</option>)}
                             </select>
                         </label>
                     </div>
@@ -183,9 +204,29 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
                             VALOR (R$)
                             <input
                                 type="text"
+                                inputMode="decimal"
                                 value={form.amount}
-                                onChange={e => setForm({ ...form, amount: e.target.value })}
-                                onBlur={e => setForm({ ...form, amount: formatAmountValue(e.target.value) })}
+                                maxLength={11}
+                                onChange={(e) => {
+                                    let value = e.target.value;
+
+                                    // Remove everything except numbers, "." and ","
+                                    value = value.replace(/[^\d.,]/g, "");
+
+                                    // Allow only one decimal separator
+                                    const parts = value.split(/[.,]/);
+                                    if (parts.length > 2) {
+                                        value = parts[0] + "." + parts.slice(1).join("");
+                                    }
+
+                                    setForm({ ...form, amount: value });
+                                }}
+                                onBlur={(e) =>
+                                    setForm({
+                                        ...form,
+                                        amount: formatAmountValue(e.target.value),
+                                    })
+                                }
                                 required
                             />
                         </label>

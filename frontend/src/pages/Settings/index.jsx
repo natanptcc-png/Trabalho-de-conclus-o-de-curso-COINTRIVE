@@ -3,21 +3,22 @@ import { useState, useEffect } from "react";
 import { showToast } from "../../utils/toast";
 
 export default function Settings({
-    userProfile,
-    setUserProfile,
-    notifications,
-    notificationSettings,
-    setNotificationSettings,
-    deleteNotification,
-    markNotificationAsRead,
-    markAllNotificationsAsRead,
-    items,
-    onUpdate,
-    theme,
-    setTheme,
-    onUpdateProfile,
-    onChangePassword,
-}) {
+        userProfile,
+        setUserProfile,
+        notifications,
+        notificationSettings,
+        setNotificationSettings,
+        deleteNotification,
+        markNotificationAsRead,
+        markAllNotificationsAsRead,
+        items,
+        onUpdate,
+        theme,
+        setTheme,
+        onUpdateProfile,
+        onChangePassword,
+    }) {
+        
     const [editMode, setEditMode] = useState(false);
     const [tempProfile, setTempProfile] = useState(userProfile);
 

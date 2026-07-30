@@ -1,14 +1,56 @@
 const categories = [
     "Todas as Categorias",
-    "Renda",
-    "Comida",
-    "Transporte",
-    "Educação",
-    "Saúde",
-    "Utilidades",
-    "Entretenimento",
+    "Alimentos",
+    "Aluguel",
+    "Auxílio",
+    "Comércio",
+    "Comissão",
     "Contas",
-    "Outro",
+    "Educação",
+    "Empréstimo",
+    "Entretenimento",
+    "Pensão",
+    "Reembolso",
+    "Salário",
+    "Saúde",
+    "Transporte",
+    "Utilidades",
+    "Outros",
 ];
 
-export default categories;
+const renda_categories = [
+    "Todas as Categorias",
+    "Auxílio",
+    "Comércio",
+    "Comissão",
+    "Empréstimo",
+    "Pensão",
+    "Reembolso",
+    "Salário",
+    "Outros",
+];
+
+const gasto_categories = [
+    "Todas as Categorias",
+    "Alimentos",
+    "Aluguel",
+    "Contas",
+    "Educação",
+    "Entretenimento",
+    "Saúde",
+    "Transporte",
+    "Utilidades",
+    "Outros",
+];
+
+function selectCategory(type) {
+    if (type === "Renda") {
+        return renda_categories
+    } else if (type === "Gastos") {
+        return gasto_categories
+    } else {
+        return categories
+    }
+}
+
+export default selectCategory;

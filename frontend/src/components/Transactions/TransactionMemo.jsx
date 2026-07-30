@@ -18,15 +18,28 @@ export default function TransactionMemo({ id, date, description, category, type,
         return d;
     }
 
+    const displayAmount = (value) => {
+        const number = Number(String(value).replace(",", "."));
+    
+        if (isNaN(number)) return value;
+    
+        return number.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+    };
+
     return (
         <tr className="transaction-row" key={id}>
             <td>
                 <div className="mobile-label">DATA</div>
                 {displayDate(date)}
             </td>
-            <td>
+            <td style={{width: "35%"}}>
                 <div className="mobile-label">DESCRIÇÃO</div>
-                {description}
+                <span className="transaction-description">
+                    {description}
+                </span>
             </td>
             <td>
                 <div className="mobile-label">CATEGORIA</div>
@@ -36,9 +49,11 @@ export default function TransactionMemo({ id, date, description, category, type,
                 <div className="mobile-label">TIPO</div>
                 <span className={tagClass}>{type}</span>
             </td>
-            <td>
+            <td style={{width: "50%"}}>
                 <div className="mobile-label">VALOR</div>
-                {type === "Renda" ? "+" : "-"} R$ {amount}
+                <p className="transaction-amount">
+                    {type === "Renda" ? "+" : "-"} R$ {displayAmount(amount)}
+                </p>
             </td>
             <td>
                 <div className="mobile-label">MÉTODO</div>

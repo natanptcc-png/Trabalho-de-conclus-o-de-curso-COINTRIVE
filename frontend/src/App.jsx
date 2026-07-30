@@ -25,7 +25,8 @@ const mockData = {
 
 import "./App.css";
 
-const API_BASE = "http://localhost:4040"; 
+//const API_BASE = "http://localhost:4040"; 
+const API_BASE = "http://172.30.2.146:4040"; 
 
 function App() {
 

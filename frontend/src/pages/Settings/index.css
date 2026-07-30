@@ -1,5 +1,5 @@
 .settings-container {
-    width: 100%;
+    width: 100vw;
     max-width: 1080px;
     margin: 0 auto;
     padding: 20px 22px;
@@ -180,7 +180,7 @@
     gap: 20px;
 }
 
-    .setting-item {
+.setting-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -408,6 +408,7 @@
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .settings-container {
+        width: 100%;
         padding: 14px 12px 92px;
     }
 

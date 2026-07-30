@@ -1,6 +1,6 @@
 import "./index.css";
 
-import { LayoutDashboard, ArrowLeftRight, Summary, Settings, SkipBack } from "lucide-react"
+import { LayoutDashboard, ArrowLeftRight, Summary, Settings, DoorOpen } from "lucide-react"
 
 export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, onLogout, userProfile }) {
 
@@ -48,7 +48,7 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, onLogout, u
                 <div className="nav-top">
 
                     <div className="brand-logo">
-                        <img src="/business/Logo.png" alt="Contrive" />
+                        <img src="/business/Icon.png" alt="Contrive" />
                     </div>
 
                     <div className="profile">
@@ -102,7 +102,7 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, onLogout, u
                     <hr />
 
                     <button type="button" className="nav-item sign-off" onClick={() => onLogout && onLogout()}>
-                        <SkipBack className='nav-icon' /> Sair
+                        <DoorOpen className='nav-icon' /> Sair
                     </button>
 
                 </div>

@@ -2,6 +2,7 @@
     width: 100%;
     max-width: 1080px;
     margin: 0 auto;
+
     padding: 20px 22px;
     position: relative;
 }
@@ -119,7 +120,53 @@
 }
 .category-select-button .caret { margin-left: auto; color:var(--text-secondary); }
 .category-select-menu {
-    position: absolute; right: 0; top: calc(100% + 8px); min-width: 220px; background: var(--bg-card); border-radius: 10px; box-shadow: 0 12px 36px rgba(2,6,23,0.08); overflow: hidden; opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: top right; transition: opacity 160ms ease, transform 160ms ease; pointer-events: none; z-index: 2300;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 220px;
+    background: var(--bg-card);
+    border-radius: 10px;
+    box-shadow: 0 12px 36px rgba(2,6,23,0.08);
+    overflow-x: hidden;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-6px) scale(.98);
+    transform-origin: top right;
+    transition: opacity 160ms ease, transform 160ms ease;
+    pointer-events: none;
+    z-index: 2300;
+    max-height: 220px;
+
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: #7c8cff transparent;
+}
+
+/* Chrome, Edge, Safari */
+.category-select-menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.category-select-menu::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 999px;
+}
+
+.category-select-menu::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #7c8cff, #5865f2);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background 0.2s ease;
+}
+
+.category-select-menu::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #8e9bff, #6a76ff);
+    background-clip: content-box;
+}
+
+.category-select-menu::-webkit-scrollbar-corner {
+    background: transparent;
 }
 .category-select.open .category-select-menu { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 .category-select-item { padding: 10px 12px; cursor: pointer; transition: background 120ms ease; }
@@ -154,10 +201,28 @@
 .filters input { padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border-color); width: 360px; }
 .filters select { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-color); }
 .date-filter { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); }
-.transactions-table-wrapper { background: var(--bg-card); border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); padding: 14px; }
+.transactions-table-wrapper { background: var(--bg-card); border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.04); padding: 14px; max-width: 1080px; }
 .transactions-table { width: 100%; border-collapse: collapse; }
-.transactions-table thead th { text-align: left; padding: 12px; color: var(--text-secondary); font-size: 0.9rem; }
-.transactions-table tbody td { padding: 12px; border-top: 1px solid var(--border-color); }
+.transactions-table thead th { text-align: center; padding: 12px; color: var(--text-secondary); font-size: 0.9rem; }
+.transactions-table tbody td { text-align: center; padding: 12px; border-top: 1px solid var(--border-color); }
+.transaction-description {
+    margin-left: auto;
+    text-align: right;
+    max-width: 60%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+}
+
+.transaction-amount {
+    margin: 0 0 0 auto;
+    text-align: center;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+    font-size: 0.92rem;
+}
 .table-footer { padding: 12px; color: var(--text-secondary); font-size: 0.9rem; }
 
 .mobile-label { display: none; }
@@ -177,7 +242,7 @@
 
     .transactions-container {
         padding: 14px 12px 92px;
-    }
+    } 
 
     .transactions-controls {
         flex-direction: column;
@@ -263,6 +328,7 @@
 
     .transactions-table tbody td {
         display: flex;
+        width: 100%;
         justify-content: space-between;
         align-items: center;
         padding: 8px 10px;
@@ -396,7 +462,7 @@
 
     .transaction-actions {
         gap: 4px;
-    }
+        }
 
     .action-btn {
         padding: 3px 6px;
@@ -405,5 +471,15 @@
 
     .aib-mob {
         display: block !important;
+    }
+
+    .transactions-table tbody td > :not(.mobile-label) {
+        justify-self: end;
+        text-align: right;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+        margin: 0;
     }
 }

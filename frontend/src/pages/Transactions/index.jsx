@@ -1,7 +1,7 @@
 import "./index.css";
 import TransactionMemo from "../../components/Transactions/TransactionMemo";
 import NewTransactionModal from "../../components/Transactions/NewTransactionModal";
-import categories from "../../data/categories";
+import selectCategory from "../../data/categories";
 import CategorySelect from "../../components/Transactions/CategorySelect";
 import { useState, useMemo, useEffect } from "react";
 import * as XLSX from "xlsx/dist/xlsx.full.min.js";
@@ -203,10 +203,10 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
                             onBlur={() => setSearchFocused(false)}
                             onChange={(e) => { setQuery(e.target.value); setPage(1); }}
                         />
-                        <label>Procure por transação, categoria...</label>
+                        <label>Procure por transação ou categoria</label>
                     </div>
 
-                    <CategorySelect options={categories} value={activeCategory} onChange={(v) => { setActiveCategory(v); setPage(1); }} />
+                    <CategorySelect options={selectCategory("GASTOS")} value={activeCategory} onChange={(v) => { setActiveCategory(v); setPage(1); }} />
 
                     <CategorySelect options={dateOptions} value={dateFilter} onChange={(v) => { setDateFilter(v); setPage(1); }} />
                 </div>
