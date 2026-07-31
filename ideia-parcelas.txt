@@ -1,0 +1,8 @@
+Criar sistema de parcela
+> Opção de definir parcelas quando definir crédito como MP (Método de Pagamento)
+> Quando criar transação, bloquear o botão de apagar durante o período das parcelas.
+> Assim que passar o período das parcelas, liberar a opção de apagar
+> Notificar usuário quando há uma parcela não paga
+> Se o usuário definir a transação como paga, não notificar até chegar até a virada do mês
+> Precisar marcar como pago cada mês, dps da virada do mês, desmarcar o isPaid automaticamente
+

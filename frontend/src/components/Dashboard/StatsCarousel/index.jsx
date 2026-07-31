@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import "./index.css";
 
-export default function StatsCarousel({ items = [] }) {
+export default function StatsCarousel({ items = [], walletValue }) {
     // Calculate current month stats
     const stats = useMemo(() => {
         const now = new Date();
@@ -23,7 +23,7 @@ export default function StatsCarousel({ items = [] }) {
             }
         });
 
-        let netSavings = totalIncome - totalExpenses;
+        let netSavings = walletValue;
 
         if (netSavings < 0) {
             netSavings = 0;

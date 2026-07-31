@@ -181,11 +181,18 @@
     color: var(--text-primary);
     font-size: 0.98rem;
 }
+.auth-input::placeholder {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}   
 
 .auth-input:focus {
     outline: none;
     border-color: var(--text-primary);
     box-shadow: 0 0 0 4px rgba(91, 93, 246, 0.12);
+}
+.auth-input:focus::placeholder {
+    opacity: 1;
 }
 
 .auth-field:focus-within label,
@@ -232,6 +239,15 @@
     font-weight: 700;
     text-decoration: none;
 }
+.auth-footer p {
+    color: #5b5df6;
+    font-weight: 700;
+    text-decoration: none;
+}
+.auth-footer p:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
 
 .auth-footer a:hover {
     text-decoration: underline;
@@ -242,6 +258,46 @@
     color: var(--text-secondary);
     font-size: 0.88rem;
     line-height: 1.5;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,12,20,0.0);
+    z-index: 2200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+}
+.modal-overlay.open {
+    opacity: 1;
+    background: rgba(10,12,20,0.45);
+    pointer-events: auto;
+}
+.modal-overlay.closing {
+    opacity: 0;
+    pointer-events: none;
+}
+.modal {
+    background: var(--bg-card);
+    padding: 22px;
+    border-radius: 12px;
+    width: 640px;
+    box-shadow: 0 20px 60px rgba(2,6,23,0.2);
+    transform: translateY(8px) scale(.99);
+    opacity: 0;
+    transition: transform 240ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease;
+}
+.modal.open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+.modal.closing {
+    transform: translateY(8px) scale(.99);
+    opacity: 0;
 }
 
 @media (max-width: 900px) {

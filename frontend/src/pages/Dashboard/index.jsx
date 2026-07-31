@@ -15,7 +15,7 @@ export default function Dashboard({ items, userProfile, onNavigate }) {
 
             </div>
 
-            <StatsCarousel items={items} />
+            <StatsCarousel items={items} walletValue={userProfile?.wallet} />
 
             <div className="content-grid">
 

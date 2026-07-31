@@ -17,16 +17,16 @@ const mockData = {
         firstName: "Daniel",
         lastName: "Silva",
         email: "daniel@email.com",
-        phone: "+55 11 99999-9999",
-        bio: "Personal finance enthusiast",
+        wallet: 0.00,
         currency: "BRL",
     }
 };
 
 import "./App.css";
 
-//const API_BASE = "http://localhost:4040"; 
-const API_BASE = "http://172.30.2.146:4040"; 
+import IP_ADDRESS from "./data/apibase";
+import { showToast } from "./utils/toast";
+const API_BASE = IP_ADDRESS; 
 
 function App() {
 
@@ -109,9 +109,68 @@ function App() {
             setAuthUser(body.user);
             setUserProfile(body.user);
             setItems(body.transactions || []);
+
             return { success: true };
         } catch (error) {
             return { success: false, message: error.message };
+        }
+    };
+
+    const handleLookForUser = async (email) => {
+        try {
+            const body = await fetchJson(`/emails?email=${encodeURIComponent(email)}`);
+    
+            if (!body) {
+                return {
+                    success: false,
+                    message: "Email does not exist."
+                };
+            }
+    
+            return {
+                success: true,
+                id: body.id,
+                email: body.email
+            };
+        } catch (err) {
+            return {
+                success: false,
+                message: err.message
+            };
+        }
+    };
+    
+    const handlePassReset = async ({ email, password }) => {
+        try {
+            const user = await handleLookForUser(email);
+
+            console.log(password);
+    
+            if (!user.success) {
+                showToast({
+                    type: "error",
+                    message: user.message
+                });
+                return user;
+            }
+    
+            console.log(user.id);
+            console.log(user.email);
+    
+            await fetchJson("/profile/force-reset", {
+                method: "PATCH",
+                body: JSON.stringify({
+                    userId: user.id,
+                    newPassword: password
+                })
+            });
+    
+            return { success: true };
+        } catch (err) {
+            return {
+                success: false,
+                message: err.message
+            };
         }
     };
 
@@ -497,7 +556,7 @@ function App() {
                 {isAuthenticated && (
                     <div className="desktop-notif">
                         <button
-                            className="notification-bell desktop"
+                            className="notification-bell"
                             onClick={() => switchPage("settings")}
                             title="Notificações"
                         >
@@ -562,6 +621,7 @@ function App() {
                         isAuthenticated={isAuthenticated}
                         onLogin={handleLogin}
                         onSignup={handleSignup}
+                        onPassReset={handlePassReset}
                         onLogout={handleLogout}
                         onUpdateProfile={handleUpdateProfile}
                         onChangePassword={handleChangePassword}

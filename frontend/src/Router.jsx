@@ -28,6 +28,7 @@ export default function Router({
     onNavigate,
     isAuthenticated,
     onLogin,
+    onPassReset,
     onSignup,
     onUpdateProfile,
     onChangePassword,
@@ -38,7 +39,7 @@ export default function Router({
             <Route
                 path="/"
                 element={
-                    isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login onLogin={onLogin} users={users} />
+                    isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login onLogin={onLogin} onPassReset={onPassReset} users={users} />
                 }
             />
             <Route

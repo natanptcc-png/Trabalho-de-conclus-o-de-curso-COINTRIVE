@@ -13,6 +13,7 @@ const categories = [
     "Reembolso",
     "Salário",
     "Saúde",
+    "Saldo/Carteira",
     "Transporte",
     "Utilidades",
     "Outros",
@@ -27,6 +28,7 @@ const renda_categories = [
     "Pensão",
     "Reembolso",
     "Salário",
+    "Saldo/Carteira",
     "Outros",
 ];
 

@@ -10,6 +10,8 @@ const API = express();
 const PORT = process.env.PORT || 4040;
 const JWT_TKN = process.env.JWT_TKN || 'dev-secret-key';
 
+const IP_ADDRESS = require("./apibase");
+
 API.use(express.json());
 API.use(cors());
 
@@ -51,7 +53,7 @@ function authenticateToken(req, res, next) {
 
 async function findUserByEmail(email) {
     const [rows] = await db.query(
-        `SELECT id, first_name, last_name, email, password, currency, role
+        `SELECT id, first_name, last_name, email, password, currency, role, wallet
          FROM bd_users
          WHERE email = ?`,
         [String(email || '').trim().toLowerCase()]
@@ -88,6 +90,7 @@ function mapUserProfile(row) {
         email: row.email,
         currency: row.currency || 'BRL',
         role: row.role || 'user',
+        wallet: row.wallet,
     };
 }
 
@@ -164,8 +167,8 @@ API.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const [insertResult] = await db.query(
             `INSERT INTO bd_users
-             (first_name, last_name, email, password, currency, role)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+             (first_name, last_name, email, password, currency, role, wallet)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
                 String(firstName || 'Novo').trim(),
                 String(lastName || 'Usuário').trim(),
@@ -173,6 +176,7 @@ API.post('/register', async (req, res) => {
                 hashedPassword,
                 'BRL',
                 'user',
+                0
             ]
         );
 
@@ -290,22 +294,21 @@ API.patch('/profile/password', authenticateToken, async (req, res) => {
     }
 });
 
-API.patch("/profile/force-reset/:id", authenticateToken, async(req,res) => {
+API.patch("/profile/force-reset", async(req,res) => {
     try {
-        const { newPassword } = req.body;
-        const { id } = req.params.id;
+        const { userId, newPassword } = req.body;
 
         if (!newPassword) {
             return res.status(400).json({error: "Missing new password."})
         }
 
         if (newPassword.length < 8) {
-            return res.status(400).json({error: "The new password must be 8 characters long minimum."})
+            return res.status(400).json({error: "A senha precisa ter pelo menos 8 caracteres."})
         }
 
-        const user = await findUserByIdWithPassword(req.user.id);
+        const user = await findUserByIdWithPassword(userId);
         if (!user) {
-            return res.status(404).json({error: "User not found."})
+            return res.status(404).json({error: "Usuário não encontrado."})
         }
 
         const hashed = await bcrypt.hash(String(newPassword), 10);
@@ -313,7 +316,7 @@ API.patch("/profile/force-reset/:id", authenticateToken, async(req,res) => {
             `UPDATE bd_users
             SET password = ?
             WHERE id = ?`,
-            [hashed, id]
+            [hashed, userId]
         );
 
         return res.status(200).json({success: true});
@@ -338,6 +341,7 @@ API.get('/transactions', authenticateToken, async (req, res) => {
         );
         return res.status(200).json(transactions);
     } catch (err) {
+        console.log(err)
         return res.status(500).json({ error: 'Unable to load transactions.', details: err.message });
     }
 });
@@ -505,6 +509,34 @@ API.delete('/transactions/:id', authenticateToken, async (req, res) => {
 
 ////////////////////////////////////////
 
+API.patch("/wallet", authenticateToken, async(req,res)=>{
+    try {
+        const { newWalletValue } = req.body;
+
+        if (!newWalletValue) {
+            return res.status(400).json({error: "Missing wallet value to update."});
+        }
+
+        const [ result ] = await db.query(
+            `
+                UPDATE bd_users
+                SET wallet = ?
+                WHERE id = ?
+            `,
+            [newWalletValue, req.user.id]
+        )
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({error: "User not found."})
+        }
+
+        return res.status(200).json({message: "Wallet updated successfully."})
+
+    } catch(err) {
+        return res.status(500).json({error: "Unable to update wallet."})
+    }
+})
+
 API.get('/users', authenticateToken, async (req, res) => {
     try {
         const [users] = await db.query(
@@ -530,8 +562,28 @@ API.get('/users/:id', authenticateToken, async (req, res) => {
     }
 });
 
-const public_ip = process.env.MACHINE_IP
+API.get("/emails", async (req,res) => {
+    try {
+        const { email } = req.query;
 
-API.listen(PORT, public_ip, () => {
-    console.log(`Logged in to host http://localhost:${PORT} or on http://${public_ip}:${PORT}`);
+        const [emails] = await db.query(
+            `SELECT id, email FROM bd_users WHERE email = ?`,
+            [email]
+        )
+
+        if (!emails) {
+            return res.status(404).json({error: "User with that email not found."});
+        }
+
+        const user = emails[0];
+
+        return res.status(200).json(user);
+
+    } catch(err) {
+        return res.status(500).json({error: "Unable to load users emails.", details: err.message});
+    }
+})
+
+API.listen(PORT, IP_ADDRESS, () => {
+    console.log(`Logged in to host http://${IP_ADDRESS}:${PORT}`);
 });

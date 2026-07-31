@@ -67,6 +67,9 @@ export default function Signup({ onSignup }) {
                             <img src="/business/Logo.png" id="business-logo" alt="Cointrive logo" />
                         </div>
                         <div>
+                            <h1>
+                                Cointrive
+                            </h1>
                             <p>
                                 Somos um aplicativo de gestão financeira para facilitar a sua gestão pessoal com uma interface simples, 
                                 coloque suas transações no mês para saber quanto de renda e gasto houve no mês, veja relatórios do seu 
@@ -95,7 +98,7 @@ export default function Signup({ onSignup }) {
                                 type="text"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
-                                placeholder=" "
+                                placeholder="Daniel"
                             />
                             <label htmlFor="signup-first-name">Nome</label>
                         </div>
@@ -107,7 +110,7 @@ export default function Signup({ onSignup }) {
                                 type="text"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
-                                placeholder=" "
+                                placeholder="Silva Santos"
                             />
                             <label htmlFor="signup-last-name">Sobrenome</label>
                         </div>
@@ -119,7 +122,7 @@ export default function Signup({ onSignup }) {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder=" "
+                                placeholder="daniel@example.com"
                             />
                             <label htmlFor="signup-email">Email</label>
                         </div>
@@ -131,7 +134,7 @@ export default function Signup({ onSignup }) {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder=" "
+                                placeholder="S#nh4F0rt3"
                             />
                             <label htmlFor="signup-password">Senha</label>
                         </div>
@@ -143,7 +146,7 @@ export default function Signup({ onSignup }) {
                                 type="password"
                                 value={confirm}
                                 onChange={(e) => setConfirm(e.target.value)}
-                                placeholder=" "
+                                placeholder="S#nh4F0rt3"
                             />
                             <label htmlFor="signup-confirm">Confirmar senha</label>
                         </div>

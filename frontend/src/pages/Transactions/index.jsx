@@ -62,7 +62,7 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
 
     const handleDeleteItem = (id, description) => {
         setDeleteConfirmId(id);
-        setDeleteConfirmDescription(description || "esta transação");
+        setDeleteConfirmDescription('description' || "esta transação");
     };
 
     const confirmDeleteItem = async () => {
@@ -292,18 +292,18 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
             />
 
             {actionsInfoOpen && (
-                        <div
-                            className={`modal-overlay ${
-                                actionsInfoClosing ? "closing" : "open"
-                            }`}
-                            onClick={closeActionsInfo}
-                        >
-                        <div
-                            className={`modal ${
-                                actionsInfoClosing ? "closing" : "open"
-                            }`}
-                            onClick={(e) => e.stopPropagation()}
-                        >        
+                <div
+                    className={`modal-overlay ${
+                        actionsInfoClosing ? "closing" : "open"
+                    }`}
+                    onClick={closeActionsInfo}
+                >
+                    <div
+                        className={`modal ${
+                            actionsInfoClosing ? "closing" : "open"
+                        }`}
+                        onClick={(e) => e.stopPropagation()}
+                    >        
                 
                         <h3>Ações das Transações</h3>
 

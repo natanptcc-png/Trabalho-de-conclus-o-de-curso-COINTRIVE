@@ -95,9 +95,8 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, onLogout, u
                         <Settings className='nav-icon' /> Configurações
                     </button>
 
-                </div>
 
-                <div className="nav-footer">
+                    <div className="nav-footer">
 
                     <hr />
 
@@ -105,6 +104,7 @@ export default function LeftNav({ menuOpen, setMenuOpen, onNavigate, onLogout, u
                         <DoorOpen className='nav-icon' /> Sair
                     </button>
 
+                    </div>
                 </div>
 
             </nav>
