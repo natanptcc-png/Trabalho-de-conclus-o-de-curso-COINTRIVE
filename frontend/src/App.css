@@ -93,9 +93,13 @@ body.modal-open {
 .dark-theme svg,
 .dark-theme .nav-icon,
 .dark-theme .notification-bell,
-.dark-theme button,
+.dark-theme  button,
 .dark-theme .nav-item {
     color: var(--text-primary) !important;
+}
+
+.dark-theme .notification-bell svg {
+    color: black !important;
 }
 
 .dark-theme .mobile-avatar {

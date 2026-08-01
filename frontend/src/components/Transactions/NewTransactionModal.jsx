@@ -173,107 +173,168 @@ export default function NewTransactionModal({ open, onClose, onAdd, editingItem,
     const submitButtonText = isEditing ? "Atualizar Transação" : "Adicionar Transação";
 
     return (
-        <div className={overlayClass}>
-            <div className={modalClass}>
-                <h3>{modalTitle}</h3>
-                <form onSubmit={submit} className="modal-form">
-                    <label>
-                        NOME
-                        <input value={form.description} onChange={e => setForm({...form, description: e.target.value})} maxLength={31} required />
-                    </label>
+      <div className={overlayClass}>
+        <div className={modalClass}>
+          <h3>{modalTitle}</h3>
+          <form onSubmit={submit} className="modal-form">
+            <label>
+              NOME
+              <input
+                value={form.description}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+                maxLength={31}
+                required
+              />
+            </label>
 
-                    <div className="row">
-                        <label>
-                            TIPO
-                            <select value={form.type} onChange={e => setForm({...form, type: e.target.value})}>
-                                <option>Renda</option>
-                                <option>Gastos</option>
-                            </select>
-                        </label>
+            <div className="row">
+              <label>
+                TIPO
+                <select
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value })}
+                >
+                  <option>Renda</option>
+                  <option>Gastos</option>
+                </select>
+              </label>
 
-                        <label>
-                            CATEGORIA
-                            <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
-                                {selectCategory(form.type).filter(c=>c!=='Todas as Categorias').map(c => <option key={c}>{c}</option>)}
-                            </select>
-                        </label>
-                    </div>
-
-                    <div className="row">
-                        <label>
-                            VALOR (R$)
-                            <input
-                                type="text"
-                                inputMode="decimal"
-                                value={form.amount}
-                                maxLength={11}
-                                onChange={(e) => {
-                                    let value = e.target.value;
-
-                                    // Remove everything except numbers, "." and ","
-                                    value = value.replace(/[^\d.,]/g, "");
-
-                                    // Allow only one decimal separator
-                                    const parts = value.split(/[.,]/);
-                                    if (parts.length > 2) {
-                                        value = parts[0] + "." + parts.slice(1).join("");
-                                    }
-
-                                    setForm({ ...form, amount: value });
-                                }}
-                                onBlur={(e) =>
-                                    setForm({
-                                        ...form,
-                                        amount: formatAmountValue(e.target.value),
-                                    })
-                                }
-                                required
-                            />
-                        </label>
-
-                        <label>
-                            MÉTODO DE PAGAMENTO
-                            <select value={form.payment} onChange={e => setForm({...form, payment: e.target.value})}>
-                                <option>Débito</option>
-                                <option>Crédito</option>
-                                <option>Conta Bancária</option>
-                                <option>Dinheiro</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <label>
-                        DATA
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', position: 'relative' }}>
-                            <input
-                                type="date"
-                                value={form.date}
-                                onChange={e => setForm({ ...form, date: e.target.value })}
-                                required
-                                style={{ flex: 1 }}
-                            />
-                        </div>
-                    </label>
-
-                    <div className="modal-actions">
-                        <button type="button" className="btn" onClick={handleClose}>Cancelar</button>
-                        <button type="submit" className="btn primary">{submitButtonText}</button>
-                    </div>
-                </form>
+              <label>
+                CATEGORIA
+                <select
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
+                >
+                  {selectCategory(form.type)
+                    .filter((c) => c !== "Todas as Categorias")
+                    .map((c) => (
+                      <option key={c}>{c}</option>
+                    ))}
+                </select>
+                {form.category === "Saldo/Carteira" && (
+                  <small>
+                    AVISO: Essa categoria afeta apenas a Carteira e não o saldo.
+                  </small>
+                )}
+              </label>
             </div>
 
-            {confirmOpen && (
-                <div className="modal-overlay open" style={{ zIndex: 2400 }}>
-                    <div className="modal open" style={{ width: 'min(560px, calc(100% - 32px))' }}>
-                        <h3>{isEditing ? "Confirmar atualização" : "Confirmar criação"}</h3>
-                        <p>{isEditing ? "Tem certeza que deseja atualizar esta transação?" : "Tem certeza de que deseja criar esta transação?"}</p>
-                        <div className="modal-actions">
-                            <button type="button" className="btn" onClick={cancelConfirmation}>Voltar</button>
-                            <button type="button" className="btn primary" onClick={confirmSubmit}>Confirmar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <div className="row">
+              <label>
+                VALOR (R$)
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.amount}
+                  maxLength={11}
+                  onChange={(e) => {
+                    let value = e.target.value;
+
+                    // Remove everything except numbers, "." and ","
+                    value = value.replace(/[^\d.,]/g, "");
+
+                    // Allow only one decimal separator
+                    const parts = value.split(/[.,]/);
+                    if (parts.length > 2) {
+                      value = parts[0] + "." + parts.slice(1).join("");
+                    }
+
+                    setForm({ ...form, amount: value });
+                  }}
+                  onBlur={(e) =>
+                    setForm({
+                      ...form,
+                      amount: formatAmountValue(e.target.value),
+                    })
+                  }
+                  required
+                />
+              </label>
+
+              <label>
+                MÉTODO DE PAGAMENTO
+                <select
+                  value={form.payment}
+                  onChange={(e) =>
+                    setForm({ ...form, payment: e.target.value })
+                  }
+                >
+                  <option>Débito</option>
+                  <option>Crédito</option>
+                  <option>Conta Bancária</option>
+                  <option>Dinheiro</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              DATA
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  alignItems: "center",
+                  position: "relative",
+                }}
+              >
+                <input
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                  required
+                  style={{ flex: 1, fontSize: "1.05rem", minHeight: "42px" }}
+                />
+              </div>
+            </label>
+
+            <div className="modal-actions">
+              <button type="button" className="btn" onClick={handleClose}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn primary">
+                {submitButtonText}
+              </button>
+            </div>
+          </form>
         </div>
+
+        {confirmOpen && (
+          <div className="modal-overlay open" style={{ zIndex: 2400 }}>
+            <div
+              className="modal open"
+              style={{ width: "min(560px, calc(100% - 32px))" }}
+            >
+              <h3>
+                {isEditing ? "Confirmar atualização" : "Confirmar criação"}
+              </h3>
+              <p>
+                {isEditing
+                  ? "Tem certeza que deseja atualizar esta transação?"
+                  : "Tem certeza de que deseja criar esta transação?"}
+              </p>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={cancelConfirmation}
+                >
+                  Voltar
+                </button>
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={confirmSubmit}
+                >
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     );
 }

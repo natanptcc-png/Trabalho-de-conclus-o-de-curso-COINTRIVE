@@ -74,6 +74,7 @@
     color: var(--text-secondary);
 }
 .modal-form .row { display:flex; gap:12px; }
+.modal-form .row label select:hover { cursor: pointer; }
 .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:4px; }
 
 /* modal content appear animation */

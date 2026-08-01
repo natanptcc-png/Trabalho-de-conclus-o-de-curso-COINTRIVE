@@ -154,214 +154,343 @@ export default function Transactions({ items, onAdd, onUpdate, onDelete }) {
     const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
     const pageItems = filtered.slice((page-1)*pageSize, page*pageSize);
 
+    const isTransactionEditable = (tx) => {
+      if (!tx?.date) return true;
+      const txDate = new Date(tx.date);
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      return txDate >= oneYearAgo;
+    };
+
     const onPaidChange = (itemId) => {
-        const item = items.find(i => i.id === itemId);
-        if (item) {
-            onUpdate(itemId, { isPaid: !item.isPaid });
-            showToast({
-                type: "success", 
-                message: item.isPaid ? `${item.description} marcada como não paga.` : `${item.description} marcada como paga.` 
-            });
+      const item = items.find((i) => i.id === itemId);
+      if (item) {
+        if (!isTransactionEditable(item) && item.type === "Renda") {
+          showToast({
+            type: "error",
+            title: "Bloqueado",
+            message: "Transações com mais de um ano não podem ser editadas.",
+          });
+          return;
         }
+        onUpdate(itemId, { isPaid: !item.isPaid });
+        showToast({
+          type: "success",
+          message: item.isPaid
+            ? `${item.description} marcada como não paga.`
+            : `${item.description} marcada como paga.`,
+        });
+      }
     };
 
     return (
-        <div className="transactions-container">
+      <div className="transactions-container">
+        <div className="transactions-header">
+          <h1>Transações</h1>
 
-            <div className="transactions-header">
-                <h1>Transações</h1>
+          <div className="actions">
+            <button className="btn export" onClick={handleExport}>
+              Exportar
+            </button>
+            <button
+              className="btn primary"
+              onClick={() => {
+                setEditingId(null);
+                setModalOpen(true);
+              }}
+            >
+              + Nova Transação
+            </button>
+          </div>
+        </div>
 
-                <div className="actions">
-                    <button className="btn export" onClick={handleExport}>Exportar</button>
-                    <button className="btn primary" onClick={() => { setEditingId(null); setModalOpen(true); }}>+ Nova Transação</button>
-                </div>
+        <div className="transactions-controls">
+          <div className="tabs-row">
+            <div className="tabs">
+              <button
+                className={`tab ${activeTab === "Todos" ? "active" : ""}`}
+                onClick={() => {
+                  setActiveTab("Todos");
+                  setPage(1);
+                }}
+              >
+                Todos
+              </button>
+              <button
+                className={`tab ${activeTab === "Renda" ? "active" : ""}`}
+                onClick={() => {
+                  setActiveTab("Renda");
+                  setPage(1);
+                }}
+              >
+                Renda
+              </button>
+              <button
+                className={`tab ${activeTab === "Gastos" ? "active" : ""}`}
+                onClick={() => {
+                  setActiveTab("Gastos");
+                  setPage(1);
+                }}
+              >
+                Gastos
+              </button>
             </div>
 
-            <div className="transactions-controls">
-                <div className="tabs-row">
-                    <div className="tabs">
-                        <button className={`tab ${activeTab==="Todos"?"active":""}`} onClick={()=>{setActiveTab("Todos"); setPage(1);}}>Todos</button>
-                        <button className={`tab ${activeTab==="Renda"?"active":""}`} onClick={()=>{setActiveTab("Renda"); setPage(1);}}>Renda</button>
-                        <button className={`tab ${activeTab==="Gastos"?"active":""}`} onClick={()=>{setActiveTab("Gastos"); setPage(1);}}>Gastos</button>
-                    </div>
+            <button
+              className="mobile-fab mobile-fab-inline"
+              aria-label="Nova Transação"
+              onClick={() => {
+                setEditingId(null);
+                setModalOpen(true);
+              }}
+            >
+              +
+            </button>
+          </div>
 
-                    <button
-                        className="mobile-fab mobile-fab-inline"
-                        aria-label="Nova Transação"
-                        onClick={() => { setEditingId(null); setModalOpen(true); }}
-                    >
-                        +
-                    </button>
-                </div>
-
-                <div className="filters">
-                    <div className={`floating ${query ? 'filled' : ''} ${searchFocused ? 'focused' : ''}`}>
-                        <input
-                            placeholder=""
-                            value={query}
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={() => setSearchFocused(false)}
-                            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-                        />
-                        <label>Procure por transação ou categoria</label>
-                    </div>
-
-                    <CategorySelect options={selectCategory("GASTOS")} value={activeCategory} onChange={(v) => { setActiveCategory(v); setPage(1); }} />
-
-                    <CategorySelect options={dateOptions} value={dateFilter} onChange={(v) => { setDateFilter(v); setPage(1); }} />
-                </div>
+          <div className="filters">
+            <div
+              className={`floating ${query ? "filled" : ""} ${searchFocused ? "focused" : ""}`}
+            >
+              <input
+                placeholder=""
+                value={query}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+              <label>Procure por transação ou categoria</label>
             </div>
 
-            <div className="transactions-table-wrapper">
-                <table className="transactions-table">
-                    <thead>
-                        <tr>
-                            <th>DATA</th>
-                            <th>DESCRIÇÃO</th>
-                            <th>CATEGORIA</th>
-                            <th>TIPO</th>
-                            <th>VALOR</th>
-                            <th>MÉTODO DE PAGAMENTO</th>
-                            <th>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        gap: "6px"
-                                    }}
-                                >
-                                    <span>AÇÕES</span>
-
-                                    <button
-                                        type="button"
-                                        className="actions-info-btn"
-                                        onClick={() => setActionsInfoOpen(true)}
-                                        title="O que faz cada botão?"
-                                    >
-                                        <Info className="licon" />
-                                    </button>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pageItems.map(tx => (
-                             <TransactionMemo 
-                                key={tx.id} 
-                                {...tx} 
-                                onEdit={() => { setEditingId(tx.id); setModalOpen(true); }}
-                                onDelete={() => handleDeleteItem(tx.id, tx.description)}
-                                onPaidChange={() => onPaidChange(tx.id)}
-                                onActionsView={() => setActionsInfoOpen(true)}
-                            />
-                            
-                        ))}
-                        
-                    </tbody>
-                    
-                </table>
-
-                {
-                    pageItems.length <= 0 &&
-
-                    <div className="table-footer">
-                        <p style={{textAlign: "center", width: "100%"}}>Nenhuma transação ativa, que tal criar uma em <b>"Nova Transação"</b>?</p>
-                    </div>
-                }
-
-                <div className="table-footer">Mostrando {filtered.length} transações</div>
-
-                {pageCount > 1 && (
-                    <div className="pagination" style={{display:'flex',gap:8,justifyContent:'flex-end',paddingTop:10}}>
-                        <button className="btn" onClick={()=>setPage(p=>Math.max(1,p-1))}>&lt;</button>
-                        {Array.from({length:pageCount}).map((_,i) => (
-                            <button key={i} className={`btn ${page===i+1? 'primary' : ''}`} onClick={()=>setPage(i+1)}>{i+1}</button>
-                        ))}
-                        <button className="btn" onClick={()=>setPage(p=>Math.min(pageCount,p+1))}>&gt;</button>
-                    </div>
-                )}
-            </div>
-
-            <NewTransactionModal 
-                open={modalOpen} 
-                onClose={() => { setModalOpen(false); setEditingId(null); }}
-                onAdd={handleAddItem}
-                editingItem={editingId ? items.find(i => i.id === editingId) : null}
-                onUpdate={handleEditItem}
+            <CategorySelect
+              options={selectCategory("GASTOS")}
+              value={activeCategory}
+              onChange={(v) => {
+                setActiveCategory(v);
+                setPage(1);
+              }}
             />
 
-            {actionsInfoOpen && (
-                <div
-                    className={`modal-overlay ${
-                        actionsInfoClosing ? "closing" : "open"
-                    }`}
-                    onClick={closeActionsInfo}
-                >
-                    <div
-                        className={`modal ${
-                            actionsInfoClosing ? "closing" : "open"
-                        }`}
-                        onClick={(e) => e.stopPropagation()}
-                    >        
-                
-                        <h3>Ações das Transações</h3>
-
-                        <p>
-                            Cada transação possui alguns botões de ação. Veja o que cada um faz:
-                        </p>
-
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "16px",
-                                marginTop: "20px"
-                            }}
-                        >
-                            <div>
-                                <strong><SquarePen className="info-licon" /> Editar</strong>
-                                <p>Abre a janela de edição para alterar qualquer informação da transação.</p>
-                            </div>
-
-                            <div>
-                                <strong><Trash2 className="info-licon" /> Excluir</strong>
-                                <p>Remove permanentemente a transação após uma confirmação.</p>
-                            </div>
-
-                            <div>
-                                <strong><BadgeDollarSign className="info-licon" /> Pago / Não Pago</strong>
-                                <p>
-                                    Marca a transação como paga ou não paga, atualizando seu status.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="modal-actions">
-                            <button
-                                className="btn primary"
-                                onClick={closeActionsInfo}
-                            >
-                                Entendi
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {deleteConfirmId && (
-                <div className="modal-overlay open" style={{ zIndex: 2400 }}>
-                    <div className="modal open" style={{ width: 'min(560px, calc(100% - 32px))' }}>
-                        <h3>Excluir Transação</h3>
-                        <p>Tem certeza que deseja excluir <strong>{deleteConfirmDescription}</strong>?</p>
-                        <div className="modal-actions">
-                            <button type="button" className="btn" onClick={cancelDeleteConfirmation}>Cancelar</button>
-                            <button type="button" className="btn primary" onClick={confirmDeleteItem}>Excluir</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
+            <CategorySelect
+              options={dateOptions}
+              value={dateFilter}
+              onChange={(v) => {
+                setDateFilter(v);
+                setPage(1);
+              }}
+            />
+          </div>
         </div>
+
+        <div className="transactions-table-wrapper">
+          <table className="transactions-table">
+            <thead>
+              <tr>
+                <th>DATA</th>
+                <th>DESCRIÇÃO</th>
+                <th>CATEGORIA</th>
+                <th>TIPO</th>
+                <th>VALOR</th>
+                <th>MÉTODO DE PAGAMENTO</th>
+                <th>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <span>AÇÕES</span>
+
+                    <button
+                      type="button"
+                      className="actions-info-btn"
+                      onClick={() => setActionsInfoOpen(true)}
+                      title="O que faz cada botão?"
+                    >
+                      <Info className="licon" />
+                    </button>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {pageItems.map((tx) => (
+                <TransactionMemo
+                  key={tx.id}
+                  {...tx}
+                  isEditable={isTransactionEditable(tx)}
+                  onEdit={() => {
+                    if (!isTransactionEditable(tx)) return;
+                    setEditingId(tx.id);
+                    setModalOpen(true);
+                  }}
+                  onDelete={() => handleDeleteItem(tx.id, tx.description)}
+                  onPaidChange={() => onPaidChange(tx.id)}
+                  onActionsView={() => setActionsInfoOpen(true)}
+                />
+              ))}
+            </tbody>
+          </table>
+
+          {pageItems.length <= 0 && (
+            <div className="table-footer">
+              <p style={{ textAlign: "center", width: "100%" }}>
+                Nenhuma transação ativa, que tal criar uma em{" "}
+                <b>"Nova Transação"</b>?
+              </p>
+            </div>
+          )}
+
+          <div className="table-footer">
+            Mostrando {filtered.length} transações
+          </div>
+
+          {pageCount > 1 && (
+            <div
+              className="pagination"
+              style={{
+                display: "flex",
+                gap: 8,
+                justifyContent: "flex-end",
+                paddingTop: 10,
+              }}
+            >
+              <button
+                className="btn"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                &lt;
+              </button>
+              {Array.from({ length: pageCount }).map((_, i) => (
+                <button
+                  key={i}
+                  className={`btn ${page === i + 1 ? "primary" : ""}`}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                className="btn"
+                onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              >
+                &gt;
+              </button>
+            </div>
+          )}
+        </div>
+
+        <NewTransactionModal
+          open={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingId(null);
+          }}
+          onAdd={handleAddItem}
+          editingItem={editingId ? items.find((i) => i.id === editingId) : null}
+          onUpdate={handleEditItem}
+        />
+
+        {actionsInfoOpen && (
+          <div
+            className={`modal-overlay ${
+              actionsInfoClosing ? "closing" : "open"
+            }`}
+            onClick={closeActionsInfo}
+          >
+            <div
+              className={`modal ${actionsInfoClosing ? "closing" : "open"}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Ações das Transações</h3>
+
+              <p>
+                Cada transação possui alguns botões de ação. Veja o que cada um
+                faz:
+              </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "16px",
+                  marginTop: "20px",
+                }}
+              >
+                <div>
+                  <strong>
+                    <SquarePen className="info-licon" /> Editar
+                  </strong>
+                  <p>
+                    Abre a janela de edição para alterar qualquer informação da
+                    transação.
+                  </p>
+                </div>
+
+                <div>
+                  <strong>
+                    <Trash2 className="info-licon" /> Excluir
+                  </strong>
+                  <p>
+                    Remove permanentemente a transação após uma confirmação.
+                  </p>
+                </div>
+
+                <div>
+                  <strong>
+                    <BadgeDollarSign className="info-licon" /> Pago / Não Pago
+                  </strong>
+                  <p>
+                    Marca a transação como paga ou não paga, atualizando seu
+                    status.
+                  </p>
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button className="btn primary" onClick={closeActionsInfo}>
+                  Entendi
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {deleteConfirmId && (
+          <div className="modal-overlay open" style={{ zIndex: 2400 }}>
+            <div
+              className="modal open"
+              style={{ width: "min(560px, calc(100% - 32px))" }}
+            >
+              <h3>Excluir Transação</h3>
+              <p>
+                Tem certeza que deseja excluir{" "}
+                <strong>{deleteConfirmDescription}</strong>?
+              </p>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={cancelDeleteConfirmation}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={confirmDeleteItem}
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     );
 }

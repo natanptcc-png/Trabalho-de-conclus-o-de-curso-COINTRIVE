@@ -1,6 +1,6 @@
 
 const LOCAL_HOST = "localhost"
-const IP_HOST = "172.30.2.167";
+const IP_HOST = "192.168.100.162";
 
 function IP_ADDRESS_GET(sel) {
     if (sel === "LOCAL") {
