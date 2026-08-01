@@ -41,3 +41,12 @@ To give more context of the dynamic icon, if the user's first name is Daniel and
 
 Prompt 6:
 fix the "Selecionar" to be a calendar icon which you can pick the date just like before, add auto-formatting to dates and cleanup modal content after creating transaction or cancelling transaction, also add a confirm modal when creating where if you confirm itll create, cancelling the confirmation modal itll return you to the create transaciton modal
+
+Promp 7:
+make it for frontend too, when a transactions gets deleted ON FRONTEND to affect wallet's value
+
+if Income gets deleted, decrease wallet value
+if Income gets its value changed, update how much that income increased wallet's value to the new income value
+Expenses does the same thing, if its gets deleted, increase wallet's value, if it gets updated, make how much the expense took frm wallets value to the new Expense value
+
+Also just as a increase, make transactions over a year old uneditble, meaning the user cant edit a transaction over a year old and only delete it or mark as paid if it is a expense

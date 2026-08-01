@@ -1,20 +1,24 @@
 SESSION db92a666-e8c9-4ee9-b380-7a823d9d2869
   Prompt 1 (351 chars):
-based on my current code, make a mysql2-based code in backend, following the same structure and commenting structure as I did, but more complete and accurate to the current website state, then later tell me what tables should I make in mysql server.
+based on my current code, make a mysql2-based code in backend, following the same structure and commenting structure as I did, but more complete and accurate to the current website state, then later tell me what tables should I make in mysql server.
+
     you can refactor the current code that has been made, then apply the correct fetches to the frontend
 ---
   Prompt 2 (360 chars):
-add to the Create Account for user to put their first name and last name, for selecting the username, in case the user has two first names, only take the first name  so it doesnt conflict with the first last name.
-    fix the navbar and bell appearing on the login/create account screen
+add to the Create Account for user to put their first name and last name, for selecting the username, in case the user has two first names, only take the first name  so it doesnt conflict with the first last name.
+
+    fix the navbar and bell appearing on the login/create account screen
+
     add a about the business on the left side of the create/login account frame
 ---
   Prompt 3 (163 chars):
 make the Create Account and Login Account more smaller in desktop, and make a small summary of what Cointrive is but put a template paragraph because Ill put later
 ---
-  Prompt 4 (143 chars):
-Uncaught ReferenceError: first is not defined
-        LeftNav index.jsx:31
-        React 10
-        performWorkUntilDeadline scheduler.development.js:45
----
+  Prompt 4:
+make it for frontend too, when a transactions gets deleted ON FRONTEND to affect wallet's value
 
+if Income gets deleted, decrease wallet value
+if Income gets its value changed, update how much that income increased wallet's value to the new income value
+Expenses does the same thing, if its gets deleted, increase wallet's value, if it gets updated, make how much the expense took frm wallets value to the new Expense value
+
+Also just as a increase, make transactions over a year old uneditble, meaning the user cant edit a transaction over a year old and only delete it or mark as paid if it is a expense
