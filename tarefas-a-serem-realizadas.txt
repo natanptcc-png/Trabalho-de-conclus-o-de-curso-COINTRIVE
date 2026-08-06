@@ -1,0 +1,4 @@
+<======> TAREFAS NECESSÁRIAS <======>
+- Sistema de parcelas de cartão de crédito
+- Possibilidade da implementação de I.A.
+- Botão de olho para visualizar a senha no cadastro e login
